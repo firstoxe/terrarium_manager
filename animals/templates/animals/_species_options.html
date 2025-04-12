@@ -1,0 +1,4 @@
+<option value="">Выберите вид</option>
+{% for species in object_list %}
+<option value="{{ species.id }}">{{ species.name }}</option>
+{% endfor %}

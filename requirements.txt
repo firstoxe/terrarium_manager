@@ -1,0 +1,13 @@
+Django
+django-crispy-forms
+crispy-bootstrap5
+django-tables2
+django-filter
+Pillow
+django-imagekit
+python-dotenv
+Django-Debug-Toolbar
+django-grappelli
+django-select2
+django_htmx
+django-redis
