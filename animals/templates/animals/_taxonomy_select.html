@@ -1,0 +1,3 @@
+{% for taxonomy in object_list %}
+    <option value="{{ taxonomy.pk }}">{{ taxonomy.scientific_name }}</option>
+{% endfor %}
