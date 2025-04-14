@@ -164,7 +164,11 @@ class TaxonomyForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_tag = False
+        self.helper.form_method = 'post'
+        self.helper.help_text_inline = True
+        self.helper.html5_required = True
+        self.helper.form_class = 'form-small'
+        self.helper.label_class = ''
         self.helper.layout = Layout(
             Field('class_name', css_class='form-control'),
             Field('order', css_class='form-control'),
@@ -173,6 +177,12 @@ class TaxonomyForm(forms.ModelForm):
             Field('species', css_class='form-control'),
             Field('subspecies', css_class='form-control'),
             Field('scientific_name', css_class='form-control'),
+            FormActions(
+                HTML(
+                    '<button type="submit" class="btn btn-primary me-2"><i class="bi bi-save"></i> Сохранить</button>'),
+                HTML(
+                    '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Отмена</button>'),
+            ),
         )
 
 

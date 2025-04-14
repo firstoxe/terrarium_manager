@@ -11,7 +11,7 @@ from .forms import AnimalForm, ActionForm, TaxonomyForm, MorphForm
 from django.urls import reverse_lazy, reverse
 
 from django_tables2 import SingleTableView
-from .tables import AnimalTable, ActionTable
+from .tables import AnimalTable, ActionTable, TaxonomyTable
 
 
 class AnimalListView(LoginRequiredMixin, SingleTableView):
@@ -210,6 +210,7 @@ class TaxonomyCreateView(LoginRequiredMixin, CreateView):
     model = Taxonomy
     form_class = TaxonomyForm
     template_name = 'animals/taxonomy_form.html'
+    success_url = reverse_lazy('animals:taxonomy_list')
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -234,6 +235,26 @@ class TaxonomySelectView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Taxonomy.objects.all().order_by('species')
+
+
+class TaxonomyListView(LoginRequiredMixin, SingleTableView):
+    model = Taxonomy
+    table_class = TaxonomyTable
+    template_name = 'animals/taxonomy_list.html'
+    paginate_by = 10
+
+
+class TaxonomyUpdateView(LoginRequiredMixin, UpdateView):
+    model = Taxonomy
+    form_class = TaxonomyForm
+    template_name = 'animals/taxonomy_form.html'
+    success_url = reverse_lazy('animals:taxonomy_list')
+
+
+class TaxonomyDeleteView(LoginRequiredMixin, DeleteView):
+    model = Taxonomy
+    template_name = 'animals/taxonomy_confirm_delete.html'
+    success_url = reverse_lazy('animals:taxonomy_list')
 
 
 

@@ -14,8 +14,13 @@ urlpatterns = [
 ]
 
 urlpatterns += [
+    path('taxonomy/', views.TaxonomyListView.as_view(), name='taxonomy_list'),
     path('taxonomy/create/', views.TaxonomyCreateView.as_view(), name='taxonomy_create'),
     path('taxonomy/select/', views.TaxonomySelectView.as_view(), name='taxonomy_select'),
-    path('morph/create/', views.MorphCreateView.as_view(), name='morph_create'),
+    path('taxonomy/<int:pk>/update/', views.TaxonomyUpdateView.as_view(), name='taxonomy_update'),
+    path('taxonomy/<int:pk>/delete/', views.TaxonomyDeleteView.as_view(), name='taxonomy_delete'),
 
+]
+urlpatterns += [
+    path('morph/create/', views.MorphCreateView.as_view(), name='morph_create'),
 ]
