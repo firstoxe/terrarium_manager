@@ -5,7 +5,7 @@ django-tables2
 django-filter
 Pillow
 django-imagekit
-python-dotenv
+Environs
 Django-Debug-Toolbar
 django-grappelli
 django-select2

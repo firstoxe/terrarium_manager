@@ -1,43 +1,141 @@
 {% extends "base.html" %}
+{% load django_tables2 %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">{{ object.name }}</h3>
-            <div>
-                <a href="{% url 'animals:update' object.pk %}" class="btn btn-sm btn-warning">
-                    <i class="bi bi-pencil"></i>
-                </a>
-                <a href="{% url 'animals:delete' object.pk %}" class="btn btn-sm btn-danger">
-                    <i class="bi bi-trash"></i>
-                </a>
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="mb-0">{{ object.name }}</h3>
+                <div>
+                    <a href="{% url 'animals:animal_update' object.pk %}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'animals:animal_delete' object.pk %}" class="btn btn-sm btn-danger">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        {% if object.photo %}
+                            <img src="{{ object.photo.url }}" class="img-fluid rounded ">
+                        {% else %}
+                            <p>Фото отсутствует</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-8">
+                        <dl class="row">
+                            <dt class="col-sm-3">Таксон</dt>
+                            <dd class="col-sm-9">{{ object.taxonomy.scientific_name }}</dd>
+
+                            {% if object.morph %}
+                                <dt class="col-sm-3">Морфа</dt>
+                                <dd class="col-sm-9">{{ object.morph.name }}</dd>
+                            {% endif %}
+
+                            <dt class="col-sm-3">Пол</dt>
+                            <dd class="col-sm-9">{{ object.get_sex_display }}</dd>
+
+                            <dt class="col-sm-3">Дата рождения</dt>
+                            <dd class="col-sm-9">{{ object.birth_date|date:"d.m.Y" }}</dd>
+
+                            <dt class="col-sm-3">Среда обитания</dt>
+                            <dd class="col-sm-9">{{ object.get_habitat_display }}</dd>
+
+                            <dt class="col-sm-3">Сложность ухода</dt>
+                            <dd class="col-sm-9">{{ object.get_care_level_display }}</dd>
+
+                            <dt class="col-sm-3">Заметки</dt>
+                            <dd class="col-sm-9">{{ object.notes|linebreaks }}</dd>
+                        </dl>
+                    </div>
+                </div>
+                <hr>
+                <h4>Действия</h4>
+                {#                {% if actions %}#}
+                {#                    <table class="table table-hover">#}
+                {#                        <thead>#}
+                {#                        <tr>#}
+                {#                            <th>Дата</th>#}
+                {#                            <th>Тип</th>#}
+                {#                            <th>Описание</th>#}
+                {#                            <th>Затраты</th>#}
+                {#                        </tr>#}
+                {#                        </thead>#}
+                {#                        <tbody>#}
+                {#                        {% for action in actions %}#}
+                {#                            <tr>#}
+                {#                                <td>{{ action.date|date:"d.m.Y H:i" }}</td>#}
+                {#                                <td>{{ action.get_action_type_display }}</td>#}
+                {#                                <td>{{ action.description }}</td>#}
+                {#                                <td>{{ action.cost }}р.</td>#}
+                {#                            </tr>#}
+                {#                        {% endfor %}#}
+                {#                        </tbody>#}
+                {#                    </table>#}
+                {#                {% else %}#}
+                {#                    <p>Действия отсутствуют.</p>#}
+                {#                {% endif %}#}
+
+                <div class="mt-4">
+                <h5>Затраты</h5>
+                <div class="d-flex justify-content-start gap-3">
+                    <div class="card text-center border-primary" style="width: 12rem;">
+                        <div class="card-header bg-primary text-white">
+                            За неделю
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ costs.week }} р.</h5>
+                        </div>
+                    </div>
+                    <div class="card text-center border-success" style="width: 12rem;">
+                        <div class="card-header bg-success text-white">
+                            За месяц
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ costs.month }} р.</h5>
+                        </div>
+                    </div>
+                    <div class="card text-center border-info" style="width: 12rem;">
+                        <div class="card-header bg-info text-white">
+                            За год
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ costs.year }} р.</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                {% if action_table.data %}
+                    {% render_table action_table %}
+                {% else %}
+                    <p>Действия отсутствуют.</p>
+                {% endif %}
+
+                <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#actionModal">
+                    <i class="bi bi-plus-lg"></i> Добавить действие
+                </button>
             </div>
         </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-4">
-                    {% if object.photo %}
-                    <img src="{{ object.photo.url }}" class="img-fluid rounded">
-                    {% endif %}
-                </div>
-                <div class="col-md-8">
-                    <dl class="row">
-                        <dt class="col-sm-3">Вид</dt>
-                        <dd class="col-sm-9">{{ object.species }}</dd>
-
-                        <dt class="col-sm-3">Пол</dt>
-                        <dd class="col-sm-9">{{ object.get_sex_display }}</dd>
-
-                        <dt class="col-sm-3">Дата рождения</dt>
-                        <dd class="col-sm-9">{{ object.birth_date|date:"d.m.Y" }}</dd>
-
-                        <dt class="col-sm-3">Заметки</dt>
-                        <dd class="col-sm-9">{{ object.notes|linebreaks }}</dd>
-                    </dl>
+        <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="actionModalLabel">Добавить действие для {{ object.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="action-form" method="post" action="{% url 'animals:action_create' object.pk %}">
+                            {% csrf_token %}
+                            {% crispy action_form %}
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+
+
 {% endblock %}

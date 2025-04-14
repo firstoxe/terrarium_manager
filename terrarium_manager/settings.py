@@ -1,12 +1,18 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+from environs import Env
 
-load_dotenv()
+env = Env()
+env.read_env()
 
+DB_HOST = env.str("DB_HOST")  # логин учётки биллинга
+DB_LOGIN = env.str("DB_LOGIN")  # логин учётки биллинга
+DB_PASS = env.str("DB_PASS")  # пароль учётки биллинга
+DB_NAME = env.str("DB_NAME")  # адрес api
+DB_PORT = env.str("DB_PORT")  # путь к драйверу api
 BASE_DIR = Path(__file__).resolve().parent.parent
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = env.str('SECRET_KEY')
 
 DEBUG = True
 
@@ -173,5 +179,5 @@ SELECT2_CACHE_BACKEND = "select2"
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost:8000']
 
-
+USE_THOUSAND_SEPARATOR = True
 

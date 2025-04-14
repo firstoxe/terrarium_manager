@@ -198,3 +198,73 @@ footer {
 .datepicker {
     background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar" viewBox="0 0 16 16"><path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM2 2a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1H2z"/><path d="M2.5 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H3a.5.5 0 0 1-.5-.5V4z"/></svg>') no-repeat right 0.75rem center/16px 16px;
 }
+
+
+.form-small .form-control {
+    border-radius: 8px;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+}
+
+.form-small label {
+    font-size: 0.85rem;
+    color: var(--dark-color);
+    margin-bottom: 0.3rem;
+}
+
+.form-small .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 576px) {
+    .form-small .col-md-6 {
+        width: 100%;
+    }
+
+    .form-small .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-small .form-control {
+        font-size: 0.85rem;
+    }
+}
+
+/* Стили для Select2 */
+
+
+/* Модальное окно */
+.modal-content {
+    border-radius: 15px;
+    background-color: var(--light-color);
+}
+
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.modal-footer .btn {
+    padding: 0.5rem 1rem;
+}
+
+
+
+#species-container {
+    position: relative; /* Убедимся, что контейнер позволяет позиционировать выпадающий список */
+    z-index: 1055;
+}
+
+/* Исправление для модального окна */
+.modal .select2-dropdown {
+    z-index: 1060; /* Ещё выше, если внутри модального окна */
+}
+
+/* Убедимся, что контейнер не обрезает содержимое */
+.form-group#species-container {
+    overflow: visible;
+}
