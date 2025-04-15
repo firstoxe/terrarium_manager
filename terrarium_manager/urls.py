@@ -24,11 +24,13 @@ from django.views.generic import RedirectView
 urlpatterns = [
     path('grappelli/', include('grappelli.urls')),
     path('admin/', admin.site.urls),
+    path("select2/", include("django_select2.urls")),
     path('accounts/', include('accounts.urls')),
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
     path('dashboard/', include('dashboard.urls')),
     path('animals/', include('animals.urls')),
-    path("select2/", include("django_select2.urls")),
+    path('feeding/', include('feeding.urls')),
+
 ] + debug_toolbar_urls()
 
 

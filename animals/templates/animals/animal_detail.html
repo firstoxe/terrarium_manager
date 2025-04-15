@@ -4,15 +4,24 @@
 
 {% block content %}
     <div class="container mt-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center bg-light">
                 <h3 class="mb-0">{{ object.name }}</h3>
                 <div>
                     <a href="{% url 'animals:animal_update' object.pk %}" class="btn btn-sm btn-warning">
-                        <i class="bi bi-pencil"></i>
+                        <i class="bi bi-pencil"></i> Редактировать
                     </a>
                     <a href="{% url 'animals:animal_delete' object.pk %}" class="btn btn-sm btn-danger">
-                        <i class="bi bi-trash"></i>
+                        <i class="bi bi-trash"></i> Удалить
                     </a>
                 </div>
             </div>
@@ -20,13 +29,13 @@
                 <div class="row">
                     <div class="col-md-4">
                         {% if object.photo %}
-                            <img src="{{ object.photo.url }}" class="img-fluid rounded ">
+                            <img src="{{ object.photo.url }}" class="img-fluid rounded" style="max-height: 300px; object-fit: cover;">
                         {% else %}
-                            <p>Фото отсутствует</p>
+                            <p class="text-muted">Фото отсутствует</p>
                         {% endif %}
                     </div>
                     <div class="col-md-8">
-                        <dl class="row">
+                        <dl class="row mb-0">
                             <dt class="col-sm-3">Таксон</dt>
                             <dd class="col-sm-9">{{ object.taxonomy.scientific_name }}</dd>
 
@@ -52,73 +61,95 @@
                         </dl>
                     </div>
                 </div>
-                <hr>
-                <h4>Действия</h4>
-                {#                {% if actions %}#}
-                {#                    <table class="table table-hover">#}
-                {#                        <thead>#}
-                {#                        <tr>#}
-                {#                            <th>Дата</th>#}
-                {#                            <th>Тип</th>#}
-                {#                            <th>Описание</th>#}
-                {#                            <th>Затраты</th>#}
-                {#                        </tr>#}
-                {#                        </thead>#}
-                {#                        <tbody>#}
-                {#                        {% for action in actions %}#}
-                {#                            <tr>#}
-                {#                                <td>{{ action.date|date:"d.m.Y H:i" }}</td>#}
-                {#                                <td>{{ action.get_action_type_display }}</td>#}
-                {#                                <td>{{ action.description }}</td>#}
-                {#                                <td>{{ action.cost }}р.</td>#}
-                {#                            </tr>#}
-                {#                        {% endfor %}#}
-                {#                        </tbody>#}
-                {#                    </table>#}
-                {#                {% else %}#}
-                {#                    <p>Действия отсутствуют.</p>#}
-                {#                {% endif %}#}
 
-                <div class="mt-4">
+                <hr class="my-4">
+
+                <h5>Действия</h5>
+                {% if action_table.data %}
+                    {% render_table action_table %}
+                    <a href="{% url 'animals:animal_detail' object.pk %}#actions" class="btn btn-sm btn-outline-primary mt-2">Показать все действия</a>
+                {% else %}
+                    <p class="text-muted">Действия отсутствуют.</p>
+                {% endif %}
+
+                <hr class="my-4">
+
+                <h5>Кормление</h5>
+                {% if overdue_feedings %}
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        Пора кормить! Последнее кормление просрочено для:
+                        <ul>
+                            {% for schedule in overdue_feedings %}
+                                <li>{{ schedule.food_item.name }} ({{ schedule.get_frequency_display }})</li>
+                            {% endfor %}
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+
+                <h6 class="mt-4">Последние кормления</h6>
+                {% if feeding_event_table.data %}
+                    {% render_table feeding_event_table %}
+                {% else %}
+                    <p class="text-muted">Записи о кормлении отсутствуют.</p>
+                {% endif %}
+
+                <h6 class="mt-4">Расписание кормления</h6>
+                {% if feeding_schedule_table.data %}
+                    {% render_table feeding_schedule_table %}
+                {% else %}
+                    <p class="text-muted">Расписание кормления отсутствует.</p>
+                {% endif %}
+
+                <h6 class="mt-4">Рекомендации по питанию</h6>
+                {% render_table feeding_recommendation_table %}
+
+                <hr class="my-4">
+
                 <h5>Затраты</h5>
                 <div class="d-flex justify-content-start gap-3">
-                    <div class="card text-center border-primary" style="width: 12rem;">
+                    <div class="card text-center border-primary shadow-sm" style="width: 10rem;">
                         <div class="card-header bg-primary text-white">
-                            За неделю
+                            <i class="bi bi-calendar-week"></i> За неделю
                         </div>
                         <div class="card-body">
-                            <h5 class="card-title">{{ costs.week }} р.</h5>
+                            <h6 class="card-title">{{ costs.week }} р.</h6>
                         </div>
                     </div>
-                    <div class="card text-center border-success" style="width: 12rem;">
+                    <div class="card text-center border-success shadow-sm" style="width: 10rem;">
                         <div class="card-header bg-success text-white">
-                            За месяц
+                            <i class="bi bi-calendar-month"></i> За месяц
                         </div>
                         <div class="card-body">
-                            <h5 class="card-title">{{ costs.month }} р.</h5>
+                            <h6 class="card-title">{{ costs.month }} р.</h6>
                         </div>
                     </div>
-                    <div class="card text-center border-info" style="width: 12rem;">
+                    <div class="card text-center border-info shadow-sm" style="width: 10rem;">
                         <div class="card-header bg-info text-white">
-                            За год
+                            <i class="bi bi-calendar"></i> За год
                         </div>
                         <div class="card-body">
-                            <h5 class="card-title">{{ costs.year }} р.</h5>
+                            <h6 class="card-title">{{ costs.year }} р.</h6>
                         </div>
                     </div>
                 </div>
-            </div>
-                {% if action_table.data %}
-                    {% render_table action_table %}
-                {% else %}
-                    <p>Действия отсутствуют.</p>
-                {% endif %}
 
-                <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#actionModal">
-                    <i class="bi bi-plus-lg"></i> Добавить действие
-                </button>
+                <div class="mt-4 d-flex gap-2">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#actionModal">
+                        <i class="bi bi-plus-lg"></i> Добавить действие
+                    </button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#feedingEventModal">
+                        <i class="bi bi-plus-lg"></i> Добавить кормление
+                    </button>
+                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#feedingScheduleModal">
+                        <i class="bi bi-plus-lg"></i> Добавить расписание
+                    </button>
+                </div>
             </div>
         </div>
+
+    </div>
+    <!-- Модальные окна -->
         <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -135,7 +166,162 @@
                 </div>
             </div>
         </div>
-    </div>
 
+        <div class="modal fade" id="feedingEventModal" tabindex="-1" aria-labelledby="feedingEventModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="feedingEventModalLabel">Добавить кормление для {{ object.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="feeding-event-form" method="post" action="{% url 'feeding:feeding_event_create' object.pk %}">
+                            {% csrf_token %}
+                            {% crispy feeding_event_form %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <div class="modal fade" id="feedingScheduleModal" tabindex="-1" aria-labelledby="feedingScheduleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="feedingScheduleModalLabel">Добавить расписание кормления для {{ object.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="feeding-schedule-form" method="post" action="{% url 'feeding:feeding_schedule_create' object.pk %}">
+                            {% csrf_token %}
+                            {% crispy feeding_schedule_form %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+{% endblock %}
+{% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const actionForm = document.getElementById('action-form');
+            const feedingEventForm = document.getElementById('feeding-event-form');
+            const feedingScheduleForm = document.getElementById('feeding-schedule-form');
+
+            actionForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(actionForm);
+                fetch("{% url 'animals:action_create' object.pk %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const tableBody = document.querySelector('#actions-table tbody');
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td>${data.action.date}</td>
+                            <td>${data.action.action_type}</td>
+                            <td>${data.action.description}</td>
+                            <td>${data.action.cost}</td>
+                            <td>
+                                <a href="{% url 'animals:action_delete' object.pk data.action.id %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        `;
+                        tableBody.prepend(newRow);
+                        bootstrap.Modal.getInstance(document.getElementById('actionModal')).hide();
+                        actionForm.reset();
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + JSON.stringify(data.errors));
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+
+            feedingEventForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(feedingEventForm);
+                fetch("{% url 'feeding:feeding_event_create' object.pk %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const tableBody = document.querySelector('#feeding-events-table tbody');
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td>${data.event.date}</td>
+                            <td>${data.event.food_item}</td>
+                            <td>${data.event.quantity}</td>
+                            <td>${data.event.cost}</td>
+                            <td>${data.event.used_calcium ? '✔' : '✘'}</td>
+                            <td>${data.event.used_vitamin_d3 ? '✔' : '✘'}</td>
+                            <td>${data.event.used_multivitamins ? '✔' : '✘'}</td>
+                            <td>
+                                <a href="{% url 'feeding:feeding_event_delete' object.pk data.event.id %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        `;
+                        tableBody.prepend(newRow);
+                        bootstrap.Modal.getInstance(document.getElementById('feedingEventModal')).hide();
+                        feedingEventForm.reset();
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + JSON.stringify(data.errors));
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+
+            feedingScheduleForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(feedingScheduleForm);
+                fetch("{% url 'feeding:feeding_schedule_create' object.pk %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const tableBody = document.querySelector('#feeding-schedule-table tbody');
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td>${data.schedule.food_item}</td>
+                            <td>${data.schedule.frequency}</td>
+                            <td>${data.schedule.quantity}</td>
+                            <td>${data.schedule.start_date}</td>
+                            <td>${data.schedule.notes}</td>
+                            <td>
+                                <a href="{% url 'feeding:feeding_schedule_delete' object.pk data.schedule.id %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        `;
+                        tableBody.prepend(newRow);
+                        bootstrap.Modal.getInstance(document.getElementById('feedingScheduleModal')).hide();
+                        feedingScheduleForm.reset();
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + JSON.stringify(data.errors));
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
 {% endblock %}

@@ -1,0 +1,18 @@
+{% load crispy_forms_tags %}
+
+<div class="modal fade" id="feedingScheduleModal" tabindex="-1" aria-labelledby="feedingScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedingScheduleModalLabel">Добавить расписание кормления для {{ object.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="feeding-schedule-form" method="post" action="{% url 'feeding:feeding_schedule_create' object.pk %}">
+                    {% csrf_token %}
+                    {% crispy form %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

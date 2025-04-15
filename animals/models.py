@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from uuid import uuid4
 
 from django.db import models
@@ -84,6 +85,45 @@ class Animal(models.Model):
     def get_absolute_url(self):
         return reverse('animals:animal_detail', kwargs={'pk': self.pk})
 
+    def get_age_group(self):
+        today = date.today()
+        age_months = (today - self.birth_date).days // 30
+        if age_months <= 6:
+            return 'newborn'
+        elif age_months <= 18:
+            return 'juvenile'
+        else:
+            return 'adult'
+
+    def get_feeding_recommendations(self):
+        age_group = self.get_age_group()
+        requirement = self.taxonomy.feeding_requirements.filter(age_group=age_group).first()
+        if not requirement:
+            return {
+                'food_type': 'unknown',
+                'frequency': 'unknown',
+                'insect_ratio': 0,
+                'plant_ratio': 0,
+                'quantity_per_feeding': 0,
+                'calcium_frequency': 'none',
+                'vitamin_d3_frequency': 'none',
+                'multivitamin_frequency': 'none',
+                'notes': 'Требования по питанию не указаны для данного вида.'
+            }
+        return {
+            'food_type': requirement.food_type,
+            'insect_ratio': requirement.insect_ratio,
+            'plant_ratio': requirement.plant_ratio,
+            'frequency': requirement.frequency,
+            'quantity_per_feeding': requirement.quantity_per_feeding,
+            'calcium_frequency': requirement.calcium_frequency,
+            'vitamin_d3_frequency': requirement.vitamin_d3_frequency,
+            'multivitamin_frequency': requirement.multivitamin_frequency,
+            'notes': requirement.notes,
+            'allowed_foods': list(self.taxonomy.allowed_foods.all())
+        }
+
+
 
 class Taxonomy(models.Model):
     class_name = models.CharField("Класс", max_length=100, blank=True)
@@ -93,6 +133,7 @@ class Taxonomy(models.Model):
     species = models.CharField("Вид", max_length=100, unique=True)
     subspecies = models.CharField("Подвид", max_length=100, blank=True)
     scientific_name = models.CharField("Научное название", max_length=200, unique=True)
+    allowed_foods = models.ManyToManyField('feeding.FoodItem', related_name='taxonomies')
 
     class Meta:
         verbose_name = "Таксон"

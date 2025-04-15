@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="bi bi-list"></i> Типы пищи</h1>
+            <a href="{% url 'feeding:food_item_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Добавить
+            </a>
+        </div>
+        {% render_table table %}
+    </div>
+{% endblock %}

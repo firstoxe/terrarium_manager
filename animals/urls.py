@@ -6,11 +6,12 @@ app_name = 'animals'
 
 urlpatterns = [
     path('', views.AnimalListView.as_view(), name='animal_list'),
-    path('create/', views.AnimalCreateView.as_view(), name='animal_create'),
-    path('<int:pk>/', views.AnimalDetailView.as_view(), name='animal_detail'),
-    path('<int:pk>/update/', views.AnimalUpdateView.as_view(), name='animal_update'),
-    path('<int:pk>/delete/', views.AnimalDeleteView.as_view(), name='animal_delete'),
-    path('<int:animal_id>/action/add/', views.ActionCreateView.as_view(), name='action_create'),
+    path('animal/<int:pk>/', views.AnimalDetailView.as_view(), name='animal_detail'),
+    path('animal/create/', views.AnimalCreateView.as_view(), name='animal_create'),
+    path('animal/<int:pk>/update/', views.AnimalUpdateView.as_view(), name='animal_update'),
+    path('animal/<int:pk>/delete/', views.AnimalDeleteView.as_view(), name='animal_delete'),
+    path('animal/<int:animal_id>/action/create/', views.ActionCreateView.as_view(), name='action_create'),
+    path('animal/<int:animal_id>/action/<int:pk>/delete/', views.ActionDeleteView.as_view(), name='action_delete'),
 ]
 
 urlpatterns += [
