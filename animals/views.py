@@ -199,31 +199,30 @@ class AnimalCreateView(LoginRequiredMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        form.instance.animal = Animal.objects.get(pk=self.kwargs['animal_id'], owner=self.request.user)
-        form.instance.created_by = self.request.user
+        form.instance.owner = self.request.user
         response = super().form_valid(form)
 
         # Если действие — это кормление, создаём FeedingEvent
-        if form.instance.action_type == 'FEEDING':
-            food_item_name = form.instance.description
-            food_item, _ = FoodItem.objects.get_or_create(
-                name=food_item_name,
-                food_type='other'  # Можно уточнить тип через форму в будущем
-            )
-            # Проверяем, подходит ли еда для таксономии
-            taxonomy = form.instance.animal.taxonomy
-            if not taxonomy.allowed_foods.filter(pk=food_item.pk).exists():
-                taxonomy.allowed_foods.add(food_item)  # Добавляем еду в допустимые, если её там нет
-            FeedingEvent.objects.create(
-                animal=form.instance.animal,
-                food_item=food_item,
-                quantity=1,  # Можно добавить поле в форму для количества
-                cost=form.instance.cost,
-                created_by=self.request.user,
-                requirement=form.instance.animal.taxonomy.feeding_requirements.filter(
-                    age_group=form.instance.animal.get_age_group()
-                ).first()
-            )
+        # if form.instance.action_type == 'FEEDING':
+        #     food_item_name = form.instance.description
+        #     food_item, _ = FoodItem.objects.get_or_create(
+        #         name=food_item_name,
+        #         food_type='other'  # Можно уточнить тип через форму в будущем
+        #     )
+        #     # Проверяем, подходит ли еда для таксономии
+        #     taxonomy = form.instance.animal.taxonomy
+        #     if not taxonomy.allowed_foods.filter(pk=food_item.pk).exists():
+        #         taxonomy.allowed_foods.add(food_item)  # Добавляем еду в допустимые, если её там нет
+        #     FeedingEvent.objects.create(
+        #         animal=form.instance.animal,
+        #         food_item=food_item,
+        #         quantity=1,  # Можно добавить поле в форму для количества
+        #         cost=form.instance.cost,
+        #         created_by=self.request.user,
+        #         requirement=form.instance.animal.taxonomy.feeding_requirements.filter(
+        #             age_group=form.instance.animal.get_age_group()
+        #         ).first()
+        #     )
 
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({
