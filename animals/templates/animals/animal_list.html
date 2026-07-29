@@ -10,24 +10,51 @@
         <p class="tm-page-lede">Список коллекции с фильтрами и быстрым переходом к карточке.</p>
     </div>
     <div class="tm-actions">
+        <div class="btn-group" role="group" aria-label="Вид списка">
+            <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}view=table"
+               class="btn btn-sm btn-outline-secondary{% if view_mode != 'cards' %} active{% endif %}">Таблица</a>
+            <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}view=cards"
+               class="btn btn-sm btn-outline-secondary{% if view_mode == 'cards' %} active{% endif %}">Карточки</a>
+        </div>
         <a href="{% url 'animals:species_library' %}" class="btn btn-outline-secondary">Справочник</a>
         <a href="{% url 'animals:animal_create' %}" class="btn btn-primary">Добавить</a>
     </div>
 </div>
 
-<form method="get" class="tm-panel mb-3">
-    <div class="tm-filter-form">
-        {{ filter.form.as_p }}
-        <div>
-            <button type="submit" class="btn btn-outline-primary w-100">Применить</button>
-        </div>
-    </div>
+<form method="get" class="tm-filter-bar tm-filter-bar--animals">
+    {% for field in filter.form %}
+        {{ field }}
+    {% endfor %}
+    <input type="hidden" name="view" value="{{ view_mode }}">
+    <button type="submit" class="btn btn-outline-primary">Применить</button>
 </form>
 
 {% if table.data %}
-<div class="tm-table-wrap">
-    {% render_table table %}
-</div>
+    {% if view_mode == 'cards' %}
+    <div class="tm-animal-cards">
+        {% for animal in animals %}
+        <a class="tm-animal-card" href="{% url 'animals:animal_detail' animal.pk %}">
+            {% if animal.photo %}
+            <img src="{{ animal.photo.url }}" alt="">
+            {% else %}
+            <div class="ph"><i class="bi bi-image"></i></div>
+            {% endif %}
+            <div class="body">
+                <strong>{{ animal.name }}</strong>
+                <div class="small text-muted">{{ animal.taxonomy.scientific_name }}</div>
+                <div class="d-flex flex-wrap gap-1 mt-2">
+                    <span class="tm-chip">{{ animal.get_sex_display }}</span>
+                    <span class="tm-chip is-info">{{ animal.get_care_level_display }}</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="tm-table-wrap">
+        {% render_table table %}
+    </div>
+    {% endif %}
 {% else %}
 <div class="tm-form-card text-center">
     <h2 class="h4 mb-2">Коллекция пока пуста</h2>

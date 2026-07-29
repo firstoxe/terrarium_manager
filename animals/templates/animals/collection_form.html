@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Новая коллекция — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Новая коллекция</h1>
+        <p class="tm-page-lede">Создайте группу для ваших животных.</p>
+    </div>
+</div>
+<div class="card p-3 p-lg-4">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary">Создать</button>
+            <a class="btn btn-outline-secondary" href="{% url 'animals:collection_list' %}">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

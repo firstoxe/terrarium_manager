@@ -42,11 +42,36 @@ python manage.py check
 docker compose up --build
 ```
 
-## Cron
+## Фоновые задачи
 
 ```bash
-python manage.py generate_reminders
+celery -A terrarium_manager worker -l info
+celery -A terrarium_manager beat -l info
 ```
+
+Celery Beat каждый час генерирует напоминания и в 08:00 по часовому поясу
+`Europe/Moscow` отправляет просроченные и сегодняшние напоминания.
+
+## Telegram
+
+Задайте `TELEGRAM_BOT_TOKEN`, настройте webhook бота на
+`https://your-host/accounts/telegram/webhook/`, затем откройте
+`/accounts/telegram/link/` и отправьте показанную команду боту.
+
+## Резервное копирование
+
+Скрипт использует `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` и
+`DB_PASSWORD` (или `DB_PASS`) и сохраняет SQL в каталог `backups/`:
+
+```bash
+sh scripts/backup_db.sh
+```
+
+## Медиафайлы
+
+Загруженные фотографии находятся в `MEDIA_ROOT` (`media/` по умолчанию).
+В production раздавайте `/media/` через nginx или объектное хранилище и
+резервируйте этот каталог отдельно от базы данных.
 
 ## Переменные окружения
 

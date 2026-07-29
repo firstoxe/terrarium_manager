@@ -5,21 +5,53 @@
 {% block content %}
 <div class="tm-page-header">
     <div>
-        <h1>Мои коллекции</h1>
-        <p class="tm-page-lede">Группы животных внутри вашего аккаунта.</p>
+        <h1>Коллекции</h1>
+        <p class="tm-page-lede">Группы животных, публичные ссылки и экспорт.</p>
+    </div>
+    <div class="tm-actions">
+        <a href="{% url 'animals:collection_export' %}" class="btn btn-outline-secondary">Экспорт CSV</a>
     </div>
 </div>
 
-<div class="card">
-    <ul class="list-group list-group-flush">
-        {% for collection in collections %}
-        <li class="list-group-item d-flex justify-content-between">
-            <strong>{{ collection.name }}</strong>
-            <span class="text-muted">{{ collection.animals.count }} животных</span>
-        </li>
-        {% empty %}
-        <li class="list-group-item text-muted">Коллекции не созданы</li>
-        {% endfor %}
-    </ul>
+<div class="tm-form-card mb-4" style="max-width:560px">
+    <h2 class="h5 mb-3">Новая коллекция</h2>
+    <form method="post" action="{% url 'animals:collection_create' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-primary" type="submit">Создать</button>
+    </form>
+</div>
+
+<div class="tm-species-grid">
+    {% for collection in collections %}
+    <article class="tm-species-card">
+        <div class="top">
+            <div>
+                <h2 class="h5 mb-1">{{ collection.name }}</h2>
+                <p class="small text-muted mb-0">{{ collection.description|default:"Без описания" }}</p>
+            </div>
+            {% if collection.is_public %}
+            <span class="tm-chip is-ok">Публичная</span>
+            {% endif %}
+        </div>
+        <div class="footer">
+            {% if collection.is_public and collection.share_token %}
+            <input class="form-control form-control-sm" readonly
+                   value="{{ request.scheme }}://{{ request.get_host }}{% url 'animals:collection_share' collection.share_token %}">
+            <form method="post" action="{% url 'animals:collection_share_disable' collection.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-outline-secondary">Выключить ссылку</button>
+            </form>
+            {% else %}
+            <form method="post" action="{% url 'animals:collection_share_enable' collection.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-primary">Публичная ссылка</button>
+            </form>
+            {% endif %}
+        </div>
+    </article>
+    {% empty %}
+    <div class="alert alert-info">Коллекций пока нет — создайте первую выше.</div>
+    {% endfor %}
 </div>
 {% endblock %}

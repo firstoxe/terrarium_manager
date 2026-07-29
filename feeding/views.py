@@ -44,12 +44,37 @@ class FeedingScheduleCreateView(LoginRequiredMixin, CreateView):
         )
         return super().dispatch(request, *args, **kwargs)
 
+    def get_initial(self):
+        initial = super().get_initial()
+        from animals.models import CareRequirement
+        req = CareRequirement.objects.filter(taxonomy=self.animal.taxonomy).first()
+        if not req:
+            return initial
+        details = req.catalog_details or {}
+        preset = (
+            (details.get('feeding_policy') or {}).get('default')
+            or details.get('feeding_default')
+            or {}
+        )
+        if preset.get('interval_days'):
+            initial['interval_days'] = preset['interval_days']
+        if preset.get('food_type'):
+            initial['food_type'] = preset['food_type']
+        if preset.get('amount'):
+            initial['amount'] = preset['amount']
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['animal'] = self.animal
+        return context
+
     def form_valid(self, form):
         form.instance.animal = self.animal
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('feeding:schedule_list')
+        return reverse_lazy('animals:animal_detail', kwargs={'pk': self.animal.pk})
 
 
 class FeedingScheduleUpdateView(LoginRequiredMixin, UpdateView):

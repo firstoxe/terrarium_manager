@@ -57,7 +57,19 @@ class SpeciesLibraryListView(LoginRequiredMixin, ListView):
         context['catalog_total'] = len(list_entries(kind='catalog'))
         context['popular_total'] = len(list_entries(kind='popular'))
         context['sex_policy_labels'] = SEX_POLICY_LABELS
+        context['can_bulk_import'] = self.request.user.is_staff
         return context
+
+
+class SpeciesLibraryBulkImportView(LoginRequiredMixin, View):
+    def post(self, request):
+        if not request.user.is_staff:
+            messages.error(request, 'Массовый импорт доступен только персоналу.')
+            return redirect('animals:species_library')
+        from .services.species_library import import_popular
+        count = import_popular()
+        messages.success(request, f'Импортировано популярных видов: {count}.')
+        return redirect(f"{reverse('animals:species_library')}?scope=popular")
 
 
 class SpeciesLibraryImportView(LoginRequiredMixin, View):

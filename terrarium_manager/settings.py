@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from celery.schedules import crontab
 from environs import Env
 
 env = Env()
@@ -116,6 +117,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '1000/day',
+        'anon': '100/day',
+    },
 }
 
 SPECTACULAR_SETTINGS = {
@@ -125,6 +134,18 @@ SPECTACULAR_SETTINGS = {
 
 CELERY_BROKER_URL = env.str('CELERY_BROKER_URL', default='redis://127.0.0.1:6379/1')
 CELERY_RESULT_BACKEND = env.str('CELERY_BROKER_URL', default='redis://127.0.0.1:6379/1')
+CELERY_TIMEZONE = 'Europe/Moscow'
+CELERY_BEAT_SCHEDULE = {
+    'generate-reminders-hourly': {
+        'task': 'reminders.tasks.generate_all_reminders',
+        'schedule': crontab(minute=0),
+    },
+    'send-reminders-every-morning': {
+        'task': 'reminders.tasks.send_reminder_emails',
+        'schedule': crontab(hour=8, minute=0),
+    },
+}
+TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN', default='')
 
 SENTRY_DSN = env.str('SENTRY_DSN', default='')
 if SENTRY_DSN:

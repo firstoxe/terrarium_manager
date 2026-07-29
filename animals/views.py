@@ -29,6 +29,12 @@ class AnimalListView(LoginRequiredMixin, SingleTableView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['filter'] = self.filterset
+        view_mode = self.request.GET.get('view') or self.request.session.get('animal_list_view', 'table')
+        if view_mode not in ('table', 'cards'):
+            view_mode = 'table'
+        self.request.session['animal_list_view'] = view_mode
+        context['view_mode'] = view_mode
+        context['animals'] = context['object_list']
         return context
 
 class AnimalDetailView(LoginRequiredMixin, DetailView):
@@ -40,6 +46,8 @@ class AnimalDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from health.forms import WeightLogForm, HealthRecordForm, SheddingLogForm
+
         actions = self.object.action_set.all()
         context['action_table'] = ActionTable(actions)
         context['action_form'] = ActionForm()
@@ -50,7 +58,32 @@ class AnimalDetailView(LoginRequiredMixin, DetailView):
         context['timeline'] = build_timeline(self.object)
         context['photos'] = self.object.photos.all()
         context['feeding_schedule'] = getattr(self.object, 'feeding_schedule', None)
+
+        weight_logs = list(self.object.weight_logs.all()[:20])
+        context['weight_logs'] = weight_logs
+        context['health_records'] = self.object.health_records.all()[:10]
+        context['shedding_logs'] = self.object.shedding_logs.all()[:10]
+        context['weight_form'] = WeightLogForm()
+        context['health_form'] = HealthRecordForm()
+        context['shedding_form'] = SheddingLogForm()
+        context['weight_chart_points'] = self._weight_chart_points(list(reversed(weight_logs)))
         return context
+
+    @staticmethod
+    def _weight_chart_points(logs):
+        if len(logs) < 2:
+            return []
+        weights = [w.weight_g for w in logs]
+        wmin, wmax = min(weights), max(weights)
+        span = (wmax - wmin) or 1
+        width, height, pad = 320, 120, 10
+        n = len(logs)
+        points = []
+        for i, w in enumerate(logs):
+            x = pad + (width - 2 * pad) * i / (n - 1)
+            y = height - pad - (height - 2 * pad) * ((w.weight_g - wmin) / span)
+            points.append({'x': round(x, 1), 'y': round(y, 1)})
+        return points
 
 
 class AnimalCreateView(LoginRequiredMixin, CreateView):
@@ -63,6 +96,15 @@ class AnimalCreateView(LoginRequiredMixin, CreateView):
         taxonomy_id = self.request.GET.get('taxonomy')
         if taxonomy_id:
             initial['taxonomy'] = taxonomy_id
+            from .models import Taxonomy
+            from animals.services.species_library import get_entry
+            taxonomy = Taxonomy.objects.filter(pk=taxonomy_id).first()
+            if taxonomy and taxonomy.library_id:
+                entry = get_entry(taxonomy.library_id)
+                if entry and entry.get('care_level'):
+                    initial['care_level'] = entry['care_level']
+                if entry and entry.get('common_name') and not initial.get('name'):
+                    initial['name'] = entry['common_name']
         return initial
 
     def get_context_data(self, **kwargs):

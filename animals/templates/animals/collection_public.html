@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}{{ collection.name }} — публичная коллекция{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>{{ collection.name }}</h1>
+        <p class="tm-page-lede">{{ collection.description|default:"Публичный просмотр коллекции." }}</p>
+    </div>
+</div>
+
+<div class="tm-animal-cards">
+    {% for animal in animals %}
+    <div class="tm-animal-card">
+        {% if animal.photo %}
+        <img src="{{ animal.photo.url }}" alt="">
+        {% else %}
+        <div class="ph"><i class="bi bi-image"></i></div>
+        {% endif %}
+        <div class="body">
+            <strong>{{ animal.name }}</strong>
+            <div class="small text-muted">{{ animal.taxonomy.scientific_name }}</div>
+            {% if animal.morph %}<div class="small">{{ animal.morph.name }}</div>{% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="alert alert-info">В коллекции пока нет животных.</div>
+    {% endfor %}
+</div>
+{% endblock %}

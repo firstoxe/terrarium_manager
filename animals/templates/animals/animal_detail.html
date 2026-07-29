@@ -58,14 +58,30 @@
 </div>
 
 <ul class="nav tm-tabs gap-1 mb-3" role="tablist">
-    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overview">Обзор</a></li>
-    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#actions">Действия</a></li>
-    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#timeline">История</a></li>
-    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#photos">Фото</a></li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tab-overview" data-bs-toggle="tab" data-bs-target="#overview"
+                type="button" role="tab" aria-controls="overview" aria-selected="true">Обзор</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-health" data-bs-toggle="tab" data-bs-target="#health"
+                type="button" role="tab" aria-controls="health" aria-selected="false">Здоровье</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-actions" data-bs-toggle="tab" data-bs-target="#actions"
+                type="button" role="tab" aria-controls="actions" aria-selected="false">Действия</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-timeline" data-bs-toggle="tab" data-bs-target="#timeline"
+                type="button" role="tab" aria-controls="timeline" aria-selected="false">История</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tab-photos" data-bs-toggle="tab" data-bs-target="#photos"
+                type="button" role="tab" aria-controls="photos" aria-selected="false">Фото</button>
+    </li>
 </ul>
 
 <div class="tab-content">
-    <div class="tab-pane fade show active" id="overview">
+    <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="tab-overview">
         {% if care_requirement %}
         <div class="row g-3">
             <div class="col-lg-6">
@@ -150,7 +166,73 @@
         {% endif %}
     </div>
 
-    <div class="tab-pane fade" id="actions">
+    <div class="tab-pane fade" id="health" role="tabpanel" aria-labelledby="tab-health">
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">Вес</div>
+                    <div class="card-body">
+                        {% if weight_points %}
+                        <svg class="tm-weight-chart" viewBox="0 0 320 120" role="img" aria-label="График веса">
+                            <polyline fill="none" stroke="currentColor" stroke-width="2"
+                                      points="{% for p in weight_chart_points %}{{ p.x }},{{ p.y }} {% endfor %}"/>
+                            {% for p in weight_chart_points %}
+                            <circle cx="{{ p.x }}" cy="{{ p.y }}" r="3" fill="currentColor"/>
+                            {% endfor %}
+                        </svg>
+                        {% endif %}
+                        <ul class="list-unstyled small mb-3">
+                            {% for w in weight_logs %}
+                            <li>{{ w.date|date:"d.m.Y" }} — <strong>{{ w.weight_g }} г</strong></li>
+                            {% empty %}
+                            <li class="text-muted">Пока нет записей веса</li>
+                            {% endfor %}
+                        </ul>
+                        <form method="post" action="{% url 'health:weight_create' object.pk %}">
+                            {% csrf_token %}{% crispy weight_form %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card mb-3">
+                    <div class="card-header">Вет / здоровье</div>
+                    <div class="card-body">
+                        <ul class="list-unstyled small mb-3">
+                            {% for h in health_records %}
+                            <li class="mb-2">
+                                <strong>{{ h.date|date:"d.m.Y" }}</strong> — {{ h.reason }}
+                                {% if h.next_visit_date %}<span class="tm-chip is-info">след. {{ h.next_visit_date|date:"d.m.Y" }}</span>{% endif %}
+                            </li>
+                            {% empty %}
+                            <li class="text-muted">Записей нет</li>
+                            {% endfor %}
+                        </ul>
+                        <form method="post" action="{% url 'health:record_create' object.pk %}">
+                            {% csrf_token %}{% crispy health_form %}
+                        </form>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Линька</div>
+                    <div class="card-body">
+                        <ul class="list-unstyled small mb-3">
+                            {% for s in shedding_logs %}
+                            <li>{{ s.date|date:"d.m.Y" }} — {{ s.get_quality_display }}</li>
+                            {% empty %}
+                            <li class="text-muted">Записей нет</li>
+                            {% endfor %}
+                        </ul>
+                        <form method="post" action="{% url 'health:shedding_create' object.pk %}">
+                            {% csrf_token %}{% crispy shedding_form %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="actions" role="tabpanel" aria-labelledby="tab-actions">
         <div class="tm-metric-row mb-3">
             <div class="tm-metric"><div class="k">Неделя</div><div class="v">{{ costs.week }} ₽</div></div>
             <div class="tm-metric"><div class="k">Месяц</div><div class="v">{{ costs.month }} ₽</div></div>
@@ -164,7 +246,7 @@
         </button>
     </div>
 
-    <div class="tab-pane fade" id="timeline">
+    <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="tab-timeline">
         <div class="card">
             <div class="card-body">
                 <ul class="tm-timeline">
@@ -182,7 +264,7 @@
         </div>
     </div>
 
-    <div class="tab-pane fade" id="photos">
+    <div class="tab-pane fade" id="photos" role="tabpanel" aria-labelledby="tab-photos">
         <div class="row g-3">
             {% for photo in photos %}
             <div class="col-md-4">
@@ -197,8 +279,26 @@
 </div>
 
 <p class="text-muted small mt-4 mb-0">
-    <a href="{% url 'animals:animal_delete' object.pk %}" class="link-danger">Удалить животное</a>
+    <button type="button" class="btn btn-link link-danger p-0" data-bs-toggle="modal" data-bs-target="#deleteModal">
+        Удалить животное
+    </button>
 </p>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Удалить {{ object.name }}?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">Это действие необратимо. Карточка и связанные записи будут удалены.</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                <a href="{% url 'animals:animal_delete' object.pk %}" class="btn btn-danger">Удалить</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="modal fade" id="actionModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -215,4 +315,24 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const triggerHash = () => {
+        const hash = window.location.hash || '#overview';
+        const trigger = document.querySelector(`[data-bs-target="${hash}"]`);
+        if (trigger) bootstrap.Tab.getOrCreateInstance(trigger).show();
+    };
+    triggerHash();
+    window.addEventListener('hashchange', triggerHash);
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(btn => {
+        btn.addEventListener('shown.bs.tab', (e) => {
+            const target = e.target.getAttribute('data-bs-target');
+            if (target && history.replaceState) history.replaceState(null, '', target);
+        });
+    });
+});
+</script>
 {% endblock %}

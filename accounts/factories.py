@@ -13,11 +13,13 @@ class UserFactory(factory.django.DjangoModelFactory):
     password = factory.PostGenerationMethodCall('set_password', 'testpass123')
     is_active = True
     is_approved = True
+    onboarding_completed = True
 
 
 class PendingUserFactory(UserFactory):
     is_active = False
     is_approved = False
+    onboarding_completed = False
 
 
 class StaffUserFactory(UserFactory):

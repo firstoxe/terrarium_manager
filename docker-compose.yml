@@ -30,6 +30,14 @@ services:
       - db
       - redis
 
+  celery-beat:
+    build: .
+    command: celery -A terrarium_manager beat -l info
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+
 volumes:
   pg_data:
   media_data:

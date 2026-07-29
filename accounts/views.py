@@ -1,16 +1,22 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+import json
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.views.generic.edit import UpdateView
+from django_ratelimit.decorators import ratelimit
 
 from .middleware import ActivityLogMiddleware
 from .models import User, ActivityLog
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
 
+@ratelimit(key='ip', rate='5/m', method='POST', block=True)
 def register(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -74,6 +80,42 @@ def profile(request):
 
 def registration_pending(request):
     return render(request, 'accounts/registration_pending.html')
+
+
+@login_required
+def telegram_link(request):
+    return render(request, 'accounts/telegram_link.html', {
+        'start_command': f'/start {request.user.username}',
+    })
+
+
+@csrf_exempt
+@require_POST
+def telegram_webhook(request):
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+        message = payload.get('message') or {}
+        chat_id = (message.get('chat') or {}).get('id')
+        text = (message.get('text') or '').strip()
+    except (json.JSONDecodeError, AttributeError, UnicodeDecodeError):
+        return JsonResponse({'ok': False, 'error': 'invalid payload'}, status=400)
+
+    if not chat_id or not text.startswith('/start'):
+        return JsonResponse({'ok': True})
+
+    parts = text.split(maxsplit=1)
+    if len(parts) < 2:
+        return JsonResponse({'ok': True})
+
+    username = parts[1].strip().lstrip('@')
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'user not found'}, status=404)
+
+    user.telegram_chat_id = str(chat_id)
+    user.save(update_fields=['telegram_chat_id'])
+    return JsonResponse({'ok': True})
 
 
 def handler404(request, exception):

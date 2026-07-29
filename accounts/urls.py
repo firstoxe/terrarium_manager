@@ -1,23 +1,32 @@
 from django.urls import path
-from . import views
 from django.contrib.auth import views as auth_views
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
+
+from . import views
 from .forms import CustomAuthenticationForm
+from .onboarding import OnboardingView
 
 app_name = 'accounts'
+
+
+@method_decorator(ratelimit(key='ip', rate='10/m', method='POST', block=True), name='dispatch')
+class RateLimitedLoginView(auth_views.LoginView):
+    template_name = 'accounts/login.html'
+    authentication_form = CustomAuthenticationForm
+
 
 urlpatterns = [
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
     path('profile/edit/', views.ProfileUpdateView.as_view(), name='profile_edit'),
     path('pending/', views.registration_pending, name='registration_pending'),
-    # Административные
+    path('onboarding/', OnboardingView.as_view(), name='onboarding'),
+    path('telegram/link/', views.telegram_link, name='telegram_link'),
+    path('telegram/webhook/', views.telegram_webhook, name='telegram_webhook'),
     path('approval/list/', views.user_approval_list, name='user_approval_list'),
     path('approve/<int:user_id>/', views.approve_user, name='approve_user'),
-    # Стандартные auth views
-    path('login/', auth_views.LoginView.as_view(
-        template_name='accounts/login.html',
-        authentication_form=CustomAuthenticationForm,
-    ), name='login'),
+    path('login/', RateLimitedLoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]
 

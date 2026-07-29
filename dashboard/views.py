@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
 from django.utils import timezone
 from django.views.generic import TemplateView
 
@@ -16,10 +17,22 @@ from reminders.models import Reminder
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard/dashboard.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        if (
+            request.user.is_authenticated
+            and not request.user.onboarding_completed
+            and not animals_for_user(request.user).exists()
+        ):
+            return redirect('accounts:onboarding')
+        return super().dispatch(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         month_ago = timezone.now() - timedelta(days=30)
+        pending = Reminder.objects.filter(
+            user=user, status='PENDING',
+        ).select_related('animal').order_by('due_date')[:8]
 
         context.update({
             'total_animals': animals_for_user(user).count(),
@@ -35,6 +48,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                 next_visit_date__isnull=False,
                 next_visit_date__gte=timezone.now().date(),
             ).select_related('animal').order_by('next_visit_date')[:5],
-            'pending_reminders': Reminder.objects.filter(user=user, status='PENDING').count(),
+            'pending_reminders': pending,
+            'pending_reminders_count': Reminder.objects.filter(user=user, status='PENDING').count(),
+            'show_onboarding_cta': (
+                not user.onboarding_completed and animals_for_user(user).exists()
+            ),
         })
         return context

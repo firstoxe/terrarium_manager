@@ -30,6 +30,11 @@ jobs:
           SECRET_KEY: test-secret-key
           DEBUG: 'True'
         run: python manage.py migrate --check
+      - name: Validate species catalog
+        env:
+          SECRET_KEY: test-secret-key
+          DEBUG: 'True'
+        run: python manage.py seed_species --list
       - name: Run tests
         env:
           SECRET_KEY: test-secret-key

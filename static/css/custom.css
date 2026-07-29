@@ -1015,6 +1015,81 @@ label.requiredField {
   --bs-btn-hover-color: var(--tm-ink);
 }
 
+.tm-onboarding {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.tm-onboarding > li {
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius);
+  background: var(--tm-surface);
+  padding: 1rem 1.15rem;
+  opacity: 0.72;
+}
+
+.tm-onboarding > li.is-current,
+.tm-onboarding > li.is-done {
+  opacity: 1;
+}
+
+.tm-onboarding > li.is-current {
+  border-color: color-mix(in srgb, var(--tm-leaf) 55%, var(--tm-line));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--tm-leaf) 25%, transparent);
+}
+
+.tm-animal-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.tm-animal-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--tm-line);
+  border-radius: var(--tm-radius);
+  overflow: hidden;
+  background: var(--tm-surface);
+}
+
+.tm-animal-card img,
+.tm-animal-card .ph {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: color-mix(in srgb, var(--tm-sand) 40%, transparent);
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  color: var(--tm-muted);
+}
+
+.tm-animal-card .body {
+  padding: 0.85rem 1rem 1rem;
+}
+
+.tm-weight-chart {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  color: var(--tm-leaf);
+  margin-bottom: 0.75rem;
+}
+
+.tm-filter-bar--animals {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) auto;
+}
+
+.btn-outline-secondary.active {
+  background: color-mix(in srgb, var(--tm-leaf) 18%, transparent);
+  border-color: var(--tm-leaf);
+}
+
 .btn-secondary {
   --bs-btn-bg: color-mix(in srgb, var(--tm-sand) 70%, white);
   --bs-btn-border-color: var(--tm-line);

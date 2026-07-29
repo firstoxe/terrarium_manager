@@ -6,8 +6,10 @@ from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from terrarium_manager.health import health_check
+from terrarium_manager.views import service_worker
 
 urlpatterns = [
+    path('sw.js', service_worker, name='service_worker'),
     path('health/', health_check, name='health'),
     path('grappelli/', include('grappelli.urls')),
     path('admin/', admin.site.urls),
@@ -20,6 +22,7 @@ urlpatterns = [
     path('incubation/', include('incubation.urls')),
     path('genetics/', include('genetics.urls')),
     path('reports/', include('reports.urls')),
+    path('health-records/', include('health.urls')),
     path('api/v1/', include('api.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

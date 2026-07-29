@@ -15,6 +15,15 @@ class Collection(models.Model):
     name = models.CharField('Название', max_length=100)
     description = models.TextField('Описание', blank=True)
     is_global = models.BooleanField('Общая библиотека', default=False)
+    share_token = models.CharField(
+        'Публичный токен',
+        max_length=64,
+        blank=True,
+        null=True,
+        unique=True,
+        db_index=True,
+    )
+    is_public = models.BooleanField('Публичная ссылка', default=False)
 
     class Meta:
         verbose_name = 'Коллекция'
@@ -22,6 +31,13 @@ class Collection(models.Model):
 
     def __str__(self):
         return self.name
+
+    def ensure_share_token(self):
+        if not self.share_token:
+            import secrets
+            self.share_token = secrets.token_urlsafe(24)
+            self.save(update_fields=['share_token'])
+        return self.share_token
 
 
 class CollectionMember(models.Model):

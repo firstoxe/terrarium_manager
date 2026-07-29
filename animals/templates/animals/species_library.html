@@ -13,6 +13,12 @@
     </div>
     <div class="tm-actions">
         <a href="{% url 'animals:animal_create' %}" class="btn btn-primary">Добавить животное</a>
+        {% if can_bulk_import %}
+        <form method="post" action="{% url 'animals:species_library_bulk' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-secondary">Импорт популярных</button>
+        </form>
+        {% endif %}
     </div>
 </div>
 

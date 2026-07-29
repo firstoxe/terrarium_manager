@@ -8,24 +8,52 @@
         <h1>Напоминания</h1>
         <p class="tm-page-lede">Что нужно сделать по коллекции — без пропусков.</p>
     </div>
+    <div class="tm-actions">
+        <form method="post" action="{% url 'reminders:generate' %}">
+            {% csrf_token %}
+            <button class="btn btn-primary">Обновить из расписаний</button>
+        </form>
+    </div>
 </div>
 
-<div class="card">
+{% if reminders %}
+<div class="tm-table-wrap">
     <ul class="list-group list-group-flush">
         {% for reminder in reminders %}
-        <li class="list-group-item d-flex justify-content-between align-items-center gap-2 {% if reminder.is_overdue %}list-group-item-warning{% endif %}">
+        <li class="list-group-item d-flex justify-content-between align-items-center gap-2 {% if reminder.is_overdue %}tm-row-alert{% endif %}">
             <div>
                 <strong>{{ reminder.title }}</strong>
-                <div class="small text-muted">{{ reminder.due_date|date:"d.m.Y" }}</div>
+                <div class="small text-muted">
+                    {{ reminder.due_date|date:"d.m.Y" }}
+                    {% if reminder.animal %} · {{ reminder.animal.name }}{% endif %}
+                    {% if reminder.is_overdue %}<span class="tm-chip is-danger ms-1">Просрочено</span>{% endif %}
+                </div>
             </div>
-            <form method="post" action="{% url 'reminders:done' reminder.pk %}">
-                {% csrf_token %}
-                <button class="btn btn-sm btn-success">Готово</button>
-            </form>
+            <div class="d-flex gap-1">
+                <form method="post" action="{% url 'reminders:done' reminder.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-success">Готово</button>
+                </form>
+                <form method="post" action="{% url 'reminders:dismiss' reminder.pk %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-secondary">Скрыть</button>
+                </form>
+            </div>
         </li>
-        {% empty %}
-        <li class="list-group-item text-muted">Нет активных напоминаний</li>
         {% endfor %}
     </ul>
 </div>
+{% else %}
+<div class="tm-form-card text-center">
+    <h2 class="h4 mb-2">Пока тихо</h2>
+    <p class="tm-page-lede mx-auto mb-3">Сгенерируйте напоминания из кормлений и ветвизитов или откройте животных.</p>
+    <div class="tm-actions justify-content-center">
+        <form method="post" action="{% url 'reminders:generate' %}">
+            {% csrf_token %}
+            <button class="btn btn-primary">Сгенерировать</button>
+        </form>
+        <a href="{% url 'animals:animal_list' %}" class="btn btn-outline-secondary">К животным</a>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

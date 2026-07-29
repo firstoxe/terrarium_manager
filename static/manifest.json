@@ -5,5 +5,13 @@
   "display": "standalone",
   "background_color": "#212529",
   "theme_color": "#212529",
-  "lang": "ru"
+  "lang": "ru",
+  "icons": [
+    {
+      "src": "/static/img/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Telegram — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Telegram-напоминания</h1>
+        <p class="tm-page-lede">Привяжите чат, чтобы получать список дел в боте.</p>
+    </div>
+</div>
+
+<div class="tm-form-card" style="max-width:560px">
+    <ol>
+        <li>Откройте вашего бота в Telegram.</li>
+        <li>Отправьте команду:</li>
+    </ol>
+    <pre class="mb-3"><code>{{ start_command }}</code></pre>
+    <p class="small text-muted mb-0">
+        Текущий chat id:
+        <strong>{{ user.telegram_chat_id|default:"не привязан" }}</strong>
+    </p>
+    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-secondary mt-3">Профиль</a>
+</div>
+{% endblock %}

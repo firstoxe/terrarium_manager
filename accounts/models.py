@@ -29,6 +29,17 @@ class User(AbstractUser):
         _('Registration date'),
         auto_now_add=True
     )
+    onboarding_completed = models.BooleanField(
+        _('Onboarding completed'),
+        default=False,
+        help_text=_('User finished the first-run wizard.'),
+    )
+    telegram_chat_id = models.CharField(
+        _('Telegram chat id'),
+        max_length=64,
+        blank=True,
+        help_text=_('Linked Telegram chat for reminders.'),
+    )
 
     objects = ApprovedUserManager()
 

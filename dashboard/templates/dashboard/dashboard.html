@@ -14,6 +14,13 @@
     </div>
 </div>
 
+{% if show_onboarding_cta %}
+<div class="alert alert-info d-flex justify-content-between align-items-center gap-2 mb-4">
+    <span>Завершите настройку: добавьте расписание кормления.</span>
+    <a href="{% url 'accounts:onboarding' %}" class="btn btn-sm btn-primary">Продолжить</a>
+</div>
+{% endif %}
+
 <div class="row g-3 mb-4">
     <div class="col-md-6 col-xl-3">
         <div class="tm-stat">
@@ -69,6 +76,35 @@
                     </li>
                     {% empty %}
                     <li class="list-group-item text-muted">Все накормлены — можно выдохнуть.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Напоминания</span>
+                <a href="{% url 'reminders:list' %}" class="small">Все ({{ pending_reminders_count }})</a>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for reminder in pending_reminders %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                        <div>
+                            <strong>{{ reminder.title }}</strong>
+                            <div class="small text-muted">{{ reminder.due_date|date:"d.m.Y" }}
+                                {% if reminder.is_overdue %}<span class="tm-chip is-danger ms-1">Просрочено</span>{% endif %}
+                            </div>
+                        </div>
+                        <form method="post" action="{% url 'reminders:done' reminder.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-success">Готово</button>
+                        </form>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">Нет активных напоминаний</li>
                     {% endfor %}
                 </ul>
             </div>
