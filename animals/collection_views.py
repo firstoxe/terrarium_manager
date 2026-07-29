@@ -50,7 +50,7 @@ class CollectionCreateView(LoginRequiredMixin, CreateView):
 class CollectionEnableShareView(LoginRequiredMixin, View):
     def post(self, request, pk):
         collection = get_object_or_404(Collection, pk=pk, owner=request.user)
-        collection.ensure_share_token()
+        collection.ensure_share_token(rotate=not collection.is_public)
         collection.is_public = True
         collection.save(update_fields=['is_public', 'share_token'])
         messages.success(request, 'Публичная ссылка включена.')
@@ -61,13 +61,19 @@ class CollectionDisableShareView(LoginRequiredMixin, View):
     def post(self, request, pk):
         collection = get_object_or_404(Collection, pk=pk, owner=request.user)
         collection.is_public = False
-        collection.save(update_fields=['is_public'])
-        messages.success(request, 'Публичная ссылка выключена.')
+        collection.ensure_share_token(rotate=True)
+        collection.save(update_fields=['is_public', 'share_token'])
+        messages.success(request, 'Публичная ссылка выключена. Старый адрес больше не действует.')
         return redirect('animals:collection_list')
 
 
 class PublicCollectionView(TemplateView):
     template_name = 'animals/collection_public.html'
+
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        response['X-Robots-Tag'] = 'noindex, nofollow'
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

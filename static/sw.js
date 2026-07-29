@@ -1,5 +1,5 @@
-const CACHE_NAME = 'terrarium-shell-v1';
-const SHELL_URLS = ['/dashboard/', '/static/css/custom.css'];
+const CACHE_NAME = 'terrarium-static-v2';
+const SHELL_URLS = ['/static/css/custom.css', '/static/js/pwa.js'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -19,15 +19,18 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const url = new URL(event.request.url);
+  if (!url.pathname.startsWith('/static/')) return;
 
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
+    caches.match(event.request).then((cached) => {
+      const network = fetch(event.request).then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         return response;
-      })
-      .catch(() => caches.match(event.request))
+      }).catch(() => cached);
+      return cached || network;
+    })
   );
 });
 

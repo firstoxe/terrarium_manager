@@ -18,6 +18,13 @@ class AnimalSerializer(serializers.ModelSerializer):
         model = Animal
         fields = ['id', 'name', 'taxonomy', 'morph', 'sex', 'birth_date', 'habitat', 'care_level', 'notes']
 
+    def validate(self, attrs):
+        taxonomy = attrs.get('taxonomy', getattr(self.instance, 'taxonomy', None))
+        morph = attrs.get('morph', getattr(self.instance, 'morph', None))
+        if morph and taxonomy and morph.taxonomy_id != taxonomy.id:
+            raise serializers.ValidationError({'morph': 'Морф должен относиться к выбранной таксономии.'})
+        return attrs
+
 
 class ActionSerializer(serializers.ModelSerializer):
     class Meta:

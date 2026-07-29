@@ -16,6 +16,13 @@ class RateLimitedLoginView(auth_views.LoginView):
     authentication_form = CustomAuthenticationForm
 
 
+@method_decorator(ratelimit(key='ip', rate='5/m', method='POST', block=True), name='dispatch')
+class RateLimitedPasswordResetView(auth_views.PasswordResetView):
+    template_name = 'accounts/password_reset.html'
+    email_template_name = 'accounts/emails/password_reset_email.html'
+    subject_template_name = 'accounts/emails/password_reset_subject.txt'
+
+
 urlpatterns = [
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
@@ -31,11 +38,7 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path('password_reset/', auth_views.PasswordResetView.as_view(
-        template_name='accounts/password_reset.html',
-        email_template_name='accounts/emails/password_reset_email.html',
-        subject_template_name='accounts/emails/password_reset_subject.txt'
-    ), name='password_reset'),
+    path('password_reset/', RateLimitedPasswordResetView.as_view(), name='password_reset'),
     path('password_reset/done/', auth_views.PasswordResetDoneView.as_view(
         template_name='accounts/password_reset_done.html'
     ), name='password_reset_done'),

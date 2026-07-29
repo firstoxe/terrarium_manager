@@ -12,7 +12,7 @@ class IncubationListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return IncubationRecord.objects.filter(
             clutch__pair__male__owner=self.request.user,
-        ).select_related('clutch', 'clutch__pair')
+        ).select_related('clutch', 'clutch__pair', 'clutch__pair__male', 'clutch__pair__female')
 
 
 class IncubationDetailView(LoginRequiredMixin, DetailView):

@@ -5,7 +5,7 @@ from django import forms
 from django.urls import reverse
 from django_select2.forms import ModelSelect2Widget
 
-from .models import Animal, Action, Taxonomy, Morph
+from .models import Animal, Action, Taxonomy, Morph, Collection
 
 
 class MySelect2WidgetMorph(ModelSelect2Widget):
@@ -63,10 +63,11 @@ class MySelect2WidgetMorphTaxonomy(ModelSelect2Widget):  # Новый видже
 class AnimalForm(forms.ModelForm):
     class Meta:
         model = Animal
-        fields = ['name', 'taxonomy', 'morph', 'birth_date', 'acquisition_date', 'sex', 'photo', 'notes', 'habitat', 'care_level']
+        fields = ['name', 'taxonomy', 'morph', 'collection', 'birth_date', 'acquisition_date', 'sex', 'photo', 'notes', 'habitat', 'care_level']
         widgets = {
             'taxonomy': MySelect2WidgetTaxonomy(attrs={'data-minimum-input-length': 0, 'style': 'width: 100%;'}),
             'morph': MySelect2WidgetMorph(attrs={'data-minimum-input-length': 0, 'style': 'width: 100%;'}),
+            'collection': forms.Select(attrs={'class': 'form-select'}),
             'birth_date': forms.DateInput(
                 attrs={
                     'type': 'date',
@@ -88,8 +89,15 @@ class AnimalForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super(AnimalForm, self).__init__(*args, **kwargs)
         self.fields['taxonomy'].queryset = Taxonomy.objects.all().order_by('scientific_name')
+        self.fields['collection'].queryset = Collection.objects.none()
+        self.fields['collection'].required = False
+        if user is not None:
+            self.fields['collection'].queryset = Collection.objects.filter(owner=user).order_by('name')
+        elif self.instance and self.instance.pk and self.instance.owner_id:
+            self.fields['collection'].queryset = Collection.objects.filter(owner=self.instance.owner).order_by('name')
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.help_text_inline = True
@@ -137,17 +145,18 @@ class AnimalForm(forms.ModelForm):
                     ),
                     css_class='col-md-6 mb-3', id='morph-container'
                 ),
+                Div(Field('collection', css_class='form-select'), css_class='col-md-6 mb-3'),
+            ),
+            Row(
                 Div(Field('sex', css_class='form-control'), css_class='col-md-6 mb-3'),
+                Div(Field('habitat', css_class='form-control'), css_class='col-md-6 mb-3'),
             ),
             Row(
                 Div(Field('birth_date', css_class='form-control'), css_class='col-md-6 mb-3'),
                 Div(Field('acquisition_date', css_class='form-control'), css_class='col-md-6 mb-3'),
             ),
             Row(
-                Div(Field('habitat', css_class='form-control'), css_class='col-md-6 mb-3'),
                 Div(Field('care_level', css_class='form-control'), css_class='col-md-6 mb-3'),
-            ),
-            Row(
                 photo_field,
             ),
             Row(

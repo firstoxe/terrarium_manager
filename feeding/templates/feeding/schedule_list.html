@@ -43,6 +43,7 @@
                     <td class="text-end text-nowrap">
                         <form method="post" action="{% url 'feeding:feed_today' schedule.animal.pk %}" class="d-inline">
                             {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
                             <button type="submit" class="btn btn-sm btn-success">Покормил</button>
                         </form>
                         <a href="{% url 'feeding:schedule_edit' schedule.pk %}" class="btn btn-sm btn-outline-secondary">Изменить</a>

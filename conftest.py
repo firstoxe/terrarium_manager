@@ -9,6 +9,7 @@ def test_settings(settings):
         },
     }
     settings.ALLOWED_HOSTS = [*settings.ALLOWED_HOSTS, 'testserver']
+    settings.RATELIMIT_ENABLE = False
 
 
 @pytest.fixture

@@ -14,6 +14,7 @@
         {% if feeding_schedule %}
         <form method="post" action="{% url 'feeding:feed_today' object.pk %}">
             {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
             <button type="submit" class="btn btn-success">Покормил</button>
         </form>
         {% else %}
@@ -172,7 +173,7 @@
                 <div class="card h-100">
                     <div class="card-header">Вес</div>
                     <div class="card-body">
-                        {% if weight_points %}
+                        {% if weight_chart_points %}
                         <svg class="tm-weight-chart" viewBox="0 0 320 120" role="img" aria-label="График веса">
                             <polyline fill="none" stroke="currentColor" stroke-width="2"
                                       points="{% for p in weight_chart_points %}{{ p.x }},{{ p.y }} {% endfor %}"/>
@@ -188,9 +189,12 @@
                             <li class="text-muted">Пока нет записей веса</li>
                             {% endfor %}
                         </ul>
-                        <form method="post" action="{% url 'health:weight_create' object.pk %}">
-                            {% csrf_token %}{% crispy weight_form %}
-                        </form>
+                        <details class="tm-health-add">
+                            <summary class="btn btn-sm btn-outline-primary mb-2">Добавить вес</summary>
+                            <form method="post" action="{% url 'health:weight_create' object.pk %}">
+                                {% csrf_token %}{% crispy weight_form %}
+                            </form>
+                        </details>
                     </div>
                 </div>
             </div>
@@ -208,9 +212,12 @@
                             <li class="text-muted">Записей нет</li>
                             {% endfor %}
                         </ul>
-                        <form method="post" action="{% url 'health:record_create' object.pk %}">
-                            {% csrf_token %}{% crispy health_form %}
-                        </form>
+                        <details class="tm-health-add">
+                            <summary class="btn btn-sm btn-outline-primary mb-2">Добавить визит</summary>
+                            <form method="post" action="{% url 'health:record_create' object.pk %}">
+                                {% csrf_token %}{% crispy health_form %}
+                            </form>
+                        </details>
                     </div>
                 </div>
                 <div class="card">
@@ -223,9 +230,12 @@
                             <li class="text-muted">Записей нет</li>
                             {% endfor %}
                         </ul>
-                        <form method="post" action="{% url 'health:shedding_create' object.pk %}">
-                            {% csrf_token %}{% crispy shedding_form %}
-                        </form>
+                        <details class="tm-health-add">
+                            <summary class="btn btn-sm btn-outline-primary mb-2">Добавить линьку</summary>
+                            <form method="post" action="{% url 'health:shedding_create' object.pk %}">
+                                {% csrf_token %}{% crispy shedding_form %}
+                            </form>
+                        </details>
                     </div>
                 </div>
             </div>
@@ -279,26 +289,8 @@
 </div>
 
 <p class="text-muted small mt-4 mb-0">
-    <button type="button" class="btn btn-link link-danger p-0" data-bs-toggle="modal" data-bs-target="#deleteModal">
-        Удалить животное
-    </button>
+    <a href="{% url 'animals:animal_delete' object.pk %}" class="link-danger">Удалить животное…</a>
 </p>
-
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Удалить {{ object.name }}?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-            </div>
-            <div class="modal-body">Это действие необратимо. Карточка и связанные записи будут удалены.</div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
-                <a href="{% url 'animals:animal_delete' object.pk %}" class="btn btn-danger">Удалить</a>
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="modal fade" id="actionModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">

@@ -32,9 +32,9 @@ class Collection(models.Model):
     def __str__(self):
         return self.name
 
-    def ensure_share_token(self):
-        if not self.share_token:
-            import secrets
+    def ensure_share_token(self, *, rotate=False):
+        import secrets
+        if rotate or not self.share_token:
             self.share_token = secrets.token_urlsafe(24)
             self.save(update_fields=['share_token'])
         return self.share_token
@@ -164,9 +164,14 @@ class Animal(models.Model):
         return reverse('animals:animal_detail', kwargs={'pk': self.pk})
 
 
+def animal_gallery_upload_to(instance, filename):
+    ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else 'jpg'
+    return os.path.join('animals', 'gallery', f'{uuid4().hex}.{ext}')
+
+
 class AnimalPhoto(models.Model):
     animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name='photos', verbose_name='Животное')
-    image = models.ImageField('Фото', upload_to='animals/gallery/')
+    image = models.ImageField('Фото', upload_to=animal_gallery_upload_to)
     caption = models.CharField('Подпись', max_length=200, blank=True)
     date = models.DateField('Дата', auto_now_add=True)
 

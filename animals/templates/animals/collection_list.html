@@ -36,8 +36,13 @@
         </div>
         <div class="footer">
             {% if collection.is_public and collection.share_token %}
-            <input class="form-control form-control-sm" readonly
-                   value="{{ request.scheme }}://{{ request.get_host }}{% url 'animals:collection_share' collection.share_token %}">
+            <div class="d-flex gap-1 w-100 flex-wrap">
+                <input class="form-control form-control-sm" id="share-{{ collection.pk }}" readonly
+                       value="{{ request.scheme }}://{{ request.get_host }}{% url 'animals:collection_share' collection.share_token %}">
+                <button type="button" class="btn btn-sm btn-outline-secondary"
+                        data-copy-target="share-{{ collection.pk }}">Копировать</button>
+            </div>
+            <p class="small text-muted mb-0">Назначьте животных в форме редактирования карточки (поле «Коллекция»).</p>
             <form method="post" action="{% url 'animals:collection_share_disable' collection.pk %}">
                 {% csrf_token %}
                 <button class="btn btn-sm btn-outline-secondary">Выключить ссылку</button>
@@ -54,4 +59,22 @@
     <div class="alert alert-info">Коллекций пока нет — создайте первую выше.</div>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.querySelectorAll('[data-copy-target]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+        const input = document.getElementById(btn.dataset.copyTarget);
+        if (!input) return;
+        try {
+            await navigator.clipboard.writeText(input.value);
+            btn.textContent = 'Скопировано';
+            setTimeout(() => { btn.textContent = 'Копировать'; }, 1500);
+        } catch (e) {
+            input.select();
+        }
+    });
+});
+</script>
 {% endblock %}

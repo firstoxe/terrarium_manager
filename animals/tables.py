@@ -5,7 +5,7 @@ from .models import Animal, Action
 
 class AnimalTable(tables.Table):
     photo = tables.TemplateColumn(
-        '<img src="{% if record.photo %}{{ record.photo.url }}{% else %}/static/no-image.png{% endif %}" class="animal-thumbnail">',
+        '{% if record.photo %}<img src="{{ record.photo.url }}" class="animal-thumbnail" alt="">{% else %}<span class="tm-chip">Нет фото</span>{% endif %}',
         verbose_name="Фото"
     )
     name = tables.Column(verbose_name="Кличка")

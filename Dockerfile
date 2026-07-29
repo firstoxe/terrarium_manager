@@ -12,10 +12,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Build-time only — must NOT persist as ENV into the runtime image.
 ARG SECRET_KEY=build-only-not-for-production
-ENV SECRET_KEY=${SECRET_KEY}
-ENV DEBUG=False
-ENV ALLOWED_HOSTS=*
-RUN python manage.py collectstatic --noinput
+RUN SECRET_KEY=${SECRET_KEY} DEBUG=False ALLOWED_HOSTS=localhost \
+    python manage.py collectstatic --noinput
 
 CMD ["gunicorn", "terrarium_manager.wsgi:application", "--bind", "0.0.0.0:8000"]

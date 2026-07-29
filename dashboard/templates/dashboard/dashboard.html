@@ -71,6 +71,7 @@
                         </div>
                         <form method="post" action="{% url 'feeding:feed_today' schedule.animal.pk %}">
                             {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
                             <button class="btn btn-sm btn-success">Покормил</button>
                         </form>
                     </li>
@@ -100,6 +101,7 @@
                         </div>
                         <form method="post" action="{% url 'reminders:done' reminder.pk %}">
                             {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
                             <button class="btn btn-sm btn-success">Готово</button>
                         </form>
                     </li>

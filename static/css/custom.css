@@ -442,7 +442,7 @@ a:hover {
 .tm-table-wrap {
   border: 1px solid var(--tm-line);
   border-radius: var(--tm-radius);
-  overflow: hidden;
+  overflow-x: auto;
   background: var(--tm-surface);
 }
 
@@ -451,11 +451,11 @@ a:hover {
 }
 
 .tm-row-alert {
-  background: color-mix(in srgb, var(--tm-amber, #c9842a) 14%, transparent);
+  background: color-mix(in srgb, var(--tm-warn, #c9842a) 14%, transparent);
 }
 
 .tm-row-alert td {
-  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--tm-amber, #c9842a) 70%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--tm-warn, #c9842a) 70%, transparent);
 }
 
 /* ---------- Badges / chips ---------- */
@@ -497,16 +497,29 @@ a:hover {
   color: #1d4c54;
 }
 
-[data-bs-theme="dark"] .tm-chip {
+[data-bs-theme="dark"] .tm-chip:not(.is-ok):not(.is-warn):not(.is-danger):not(.is-info) {
   background: color-mix(in srgb, var(--tm-sand) 70%, black);
   color: var(--tm-ink);
 }
 
-[data-bs-theme="dark"] .tm-chip.is-ok,
-[data-bs-theme="dark"] .tm-chip.is-warn,
-[data-bs-theme="dark"] .tm-chip.is-danger,
+[data-bs-theme="dark"] .tm-chip.is-ok {
+  background: color-mix(in srgb, var(--tm-ok) 28%, black);
+  color: #d7f0d4;
+}
+
+[data-bs-theme="dark"] .tm-chip.is-warn {
+  background: color-mix(in srgb, var(--tm-warn) 28%, black);
+  color: #f5e2b8;
+}
+
+[data-bs-theme="dark"] .tm-chip.is-danger {
+  background: color-mix(in srgb, var(--tm-danger) 28%, black);
+  color: #f3c7c1;
+}
+
 [data-bs-theme="dark"] .tm-chip.is-info {
-  color: var(--tm-ink);
+  background: color-mix(in srgb, var(--tm-info) 28%, black);
+  color: #c8e8ee;
 }
 
 .badge {
@@ -1085,9 +1098,15 @@ label.requiredField {
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) auto;
 }
 
-.btn-outline-secondary.active {
-  background: color-mix(in srgb, var(--tm-leaf) 18%, transparent);
-  border-color: var(--tm-leaf);
+.tm-health-add summary {
+  list-style: none;
+  cursor: pointer;
+}
+.tm-health-add summary::-webkit-details-marker {
+  display: none;
+}
+.tm-health-add[open] summary {
+  margin-bottom: 0.75rem;
 }
 
 .btn-secondary {

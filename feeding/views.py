@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
@@ -5,6 +6,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, View
 
 from animals.services.ownership import animals_for_user
+from terrarium_manager.redirects import safe_redirect
 from .forms import FeedingScheduleForm
 from .models import FeedingLog, FeedingSchedule
 from .services.feeding import log_feeding
@@ -95,6 +97,7 @@ class FeedTodayView(LoginRequiredMixin, View):
         log_feeding(animal, request.user)
         if request.htmx:
             return HttpResponse(
-                f'<span class="badge bg-success">Покормлен {animal.name}</span>',
+                f'<span class="tm-chip is-ok">Покормлен {animal.name}</span>',
             )
-        return redirect('feeding:schedule_list')
+        messages.success(request, f'«{animal.name}» отмечен как покормленный.')
+        return safe_redirect(request, fallback='feeding:schedule_list')

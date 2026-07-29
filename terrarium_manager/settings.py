@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
+
 from celery.schedules import crontab
+from django.core.exceptions import ImproperlyConfigured
 from environs import Env
 
 env = Env()
@@ -146,6 +148,7 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 TELEGRAM_BOT_TOKEN = env.str('TELEGRAM_BOT_TOKEN', default='')
+TELEGRAM_WEBHOOK_SECRET = env.str('TELEGRAM_WEBHOOK_SECRET', default='')
 
 SENTRY_DSN = env.str('SENTRY_DSN', default='')
 if SENTRY_DSN:
@@ -154,10 +157,12 @@ if SENTRY_DSN:
     sentry_sdk.init(dsn=SENTRY_DSN, integrations=[DjangoIntegration()])
 
 if not DEBUG:
-    SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=False)
+    SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=True)
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=0)
+    SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=31536000)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=True)
+    SECURE_REFERRER_POLICY = 'same-origin'
     if env.bool('BEHIND_TLS_PROXY', default=False):
         SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -180,6 +185,15 @@ LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
+
+from django.contrib.messages import constants as message_constants
+MESSAGE_TAGS = {
+    message_constants.DEBUG: 'secondary',
+    message_constants.INFO: 'info',
+    message_constants.SUCCESS: 'success',
+    message_constants.WARNING: 'warning',
+    message_constants.ERROR: 'danger',
+}
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
@@ -237,21 +251,27 @@ EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env.str('DEFAULT_FROM_EMAIL', default='Terrarium Manager <noreply@localhost>')
 
-ADMINS = [('Admin Name', 'admin@example.com')]
-
-handler404 = 'accounts.views.handler404'
-handler500 = 'accounts.views.handler500'
-
+_admins_raw = env.str('ADMINS', default='')
+ADMINS = []
+for _entry in _admins_raw.split(','):
+    _entry = _entry.strip()
+    if not _entry:
+        continue
+    if '<' in _entry and _entry.endswith('>'):
+        _name, _email = _entry[:-1].split('<', 1)
+        ADMINS.append((_name.strip() or _email.strip(), _email.strip()))
+    else:
+        ADMINS.append((_entry, _entry))
 
 GRAPPELLI_ADMIN_TITLE = 'Terrarium Manager'
 GRAPPELLI_INDEX_DASHBOARD = 'accounts.dashboard.CustomIndexDashboard'
 
 SELECT2_CSS = 'css/select2/select2.min.css'
 SELECT2_JS = 'js/select2/select2.full.js'
-# SELECT2_JS = [f'{STATIC_ROOT}/script/select2.min.js']
-# SELECT2_CSS = [f'{STATIC_ROOT}/style/select2.min.css']
 
-USE_REDIS = env.bool('USE_REDIS', default=False)
+USE_REDIS = env.bool('USE_REDIS', default=not DEBUG)
+if not DEBUG and not USE_REDIS:
+    raise ImproperlyConfigured('USE_REDIS must be True when DEBUG=False (shared cache for ratelimit/select2).')
 
 if USE_REDIS:
     CACHES = {

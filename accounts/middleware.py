@@ -1,8 +1,8 @@
-import json
-from datetime import datetime
-from django.utils import timezone
-from django.contrib.auth import user_logged_in, user_logged_out
+from django.contrib.auth import logout, user_logged_in, user_logged_out
+from django.shortcuts import redirect
+
 from .models import ActivityLog
+
 
 class ActivityLogMiddleware:
     def __init__(self, get_response):
@@ -35,5 +35,13 @@ class ActivityLogMiddleware:
         return x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
 
     def __call__(self, request):
-        response = self.get_response(request)
-        return response
+        user = getattr(request, 'user', None)
+        if (
+            user is not None
+            and user.is_authenticated
+            and not user.is_staff
+            and not getattr(user, 'is_approved', True)
+        ):
+            logout(request)
+            return redirect('accounts:registration_pending')
+        return self.get_response(request)

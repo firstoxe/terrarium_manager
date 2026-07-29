@@ -11,9 +11,9 @@
     </div>
     <div class="tm-actions">
         <div class="btn-group" role="group" aria-label="Вид списка">
-            <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}view=table"
+            <a href="?{{ view_query_table }}"
                class="btn btn-sm btn-outline-secondary{% if view_mode != 'cards' %} active{% endif %}">Таблица</a>
-            <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}view=cards"
+            <a href="?{{ view_query_cards }}"
                class="btn btn-sm btn-outline-secondary{% if view_mode == 'cards' %} active{% endif %}">Карточки</a>
         </div>
         <a href="{% url 'animals:species_library' %}" class="btn btn-outline-secondary">Справочник</a>
@@ -23,13 +23,17 @@
 
 <form method="get" class="tm-filter-bar tm-filter-bar--animals">
     {% for field in filter.form %}
+        <label class="visually-hidden" for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
     {% endfor %}
     <input type="hidden" name="view" value="{{ view_mode }}">
     <button type="submit" class="btn btn-outline-primary">Применить</button>
+    {% if filters_active %}
+    <a href="{% url 'animals:animal_list' %}?view={{ view_mode }}" class="btn btn-outline-secondary">Сбросить</a>
+    {% endif %}
 </form>
 
-{% if table.data %}
+{% if has_results %}
     {% if view_mode == 'cards' %}
     <div class="tm-animal-cards">
         {% for animal in animals %}
@@ -37,7 +41,7 @@
             {% if animal.photo %}
             <img src="{{ animal.photo.url }}" alt="">
             {% else %}
-            <div class="ph"><i class="bi bi-image"></i></div>
+            <div class="ph"><i class="bi bi-image" aria-hidden="true"></i></div>
             {% endif %}
             <div class="body">
                 <strong>{{ animal.name }}</strong>
@@ -50,11 +54,20 @@
         </a>
         {% endfor %}
     </div>
+    {% if is_paginated %}
+    {% include "pagination.html" %}
+    {% endif %}
     {% else %}
-    <div class="tm-table-wrap">
+    <div class="tm-table-wrap table-responsive">
         {% render_table table %}
     </div>
     {% endif %}
+{% elif filters_active %}
+<div class="tm-form-card text-center">
+    <h2 class="h4 mb-2">Ничего не найдено</h2>
+    <p class="tm-page-lede mx-auto mb-3">Сбросьте фильтры или измените запрос.</p>
+    <a href="{% url 'animals:animal_list' %}?view={{ view_mode }}" class="btn btn-primary">Сбросить фильтры</a>
+</div>
 {% else %}
 <div class="tm-form-card text-center">
     <h2 class="h4 mb-2">Коллекция пока пуста</h2>

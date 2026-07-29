@@ -5,7 +5,7 @@
 {% block content %}
 <div class="tm-page-header">
     <div>
-        <h1>Добро пожаловать</h1>
+        <h1>{% if revisit %}Настройка коллекции{% else %}Добро пожаловать{% endif %}</h1>
         <p class="tm-page-lede">Три шага — и ежедневный уход уже под контролем.</p>
     </div>
 </div>
@@ -15,7 +15,8 @@
         <strong>1. Выберите вид</strong>
         <p class="mb-2">Популярные виды уже в справочнике ({{ popular_count }}). Начните с уровня «Новичок».</p>
         {% if step == 1 %}
-        <a href="{% url 'animals:species_library' %}?scope=popular&care_level=BEGINNER" class="btn btn-primary">Открыть справочник</a>
+        <a href="{% url 'animals:species_library' %}?scope=popular&care_level=BEGINNER&next={% url 'accounts:onboarding' %}"
+           class="btn btn-primary">Открыть справочник</a>
         {% endif %}
     </li>
     <li class="{% if step > 2 %}is-done{% elif step == 2 %}is-current{% endif %}">
@@ -23,6 +24,7 @@
         <p class="mb-2">После импорта вида создайте карточку и сразу добавьте кормление (поля подтянутся из рекомендаций).</p>
         {% if step == 2 and animal %}
         <a href="{% url 'feeding:schedule_create' animal.pk %}" class="btn btn-primary">Расписание для {{ animal.name }}</a>
+        <a href="{% url 'accounts:onboarding' %}" class="btn btn-outline-secondary ms-1">Обновить шаг</a>
         {% elif step == 2 %}
         <a href="{% url 'animals:animal_create' %}" class="btn btn-primary">Создать животное</a>
         {% endif %}
@@ -41,6 +43,8 @@
 
 <form method="post" class="mt-3">
     {% csrf_token %}
-    <button type="submit" name="action" value="skip" class="btn btn-link">Пропустить онбординг</button>
+    <button type="submit" name="action" value="skip" class="btn btn-link">
+        {% if revisit %}Закрыть{% else %}Пропустить онбординг{% endif %}
+    </button>
 </form>
 {% endblock %}

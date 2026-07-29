@@ -102,15 +102,22 @@ def import_entry(library_id: str, kind: str = 'catalog') -> Taxonomy:
         'is_global': True,
     }
 
-    taxonomy = (
-        Taxonomy.objects.filter(library_id=library_id).first()
-        or Taxonomy.objects.filter(scientific_name=entry['scientific_name']).first()
-    )
+    taxonomy = Taxonomy.objects.filter(library_id=library_id).first()
     if taxonomy:
-        for key, value in taxonomy_defaults.items():
-            setattr(taxonomy, key, value)
+        # Already imported under this library id — do not overwrite care/taxonomy
+        # data that other users may rely on.
+        for morph_data in entry.get('morphs', []):
+            Morph.objects.get_or_create(
+                taxonomy=taxonomy,
+                name=morph_data['name'],
+                defaults={'description': morph_data.get('description', '')},
+            )
+        return taxonomy
+
+    taxonomy = Taxonomy.objects.filter(scientific_name=entry['scientific_name']).first()
+    if taxonomy:
         taxonomy.library_id = library_id
-        taxonomy.save()
+        taxonomy.save(update_fields=['library_id'])
     else:
         taxonomy = Taxonomy.objects.create(library_id=library_id, **taxonomy_defaults)
 
@@ -119,7 +126,7 @@ def import_entry(library_id: str, kind: str = 'catalog') -> Taxonomy:
         # Сохраняем остальную структуру справочника как JSON, чтобы не раздувать модель.
         # В дальнейшем из этих данных можно строить UI: размеры террариума, группы/пол, кормление по возрасту и т.д.
         catalog_details = {k: v for k, v in entry.items() if k != 'morphs'}
-        CareRequirement.objects.update_or_create(
+        CareRequirement.objects.get_or_create(
             taxonomy=taxonomy,
             defaults={**care, 'catalog_details': catalog_details},
         )

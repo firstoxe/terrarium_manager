@@ -5,6 +5,7 @@ from django.views import View
 from django.views.generic import ListView
 
 from reminders.services import generate_reminders_for_user
+from terrarium_manager.redirects import safe_redirect
 from .models import Reminder
 
 
@@ -24,10 +25,8 @@ class ReminderDoneView(LoginRequiredMixin, View):
         reminder = get_object_or_404(Reminder, pk=pk, user=request.user)
         reminder.status = 'DONE'
         reminder.save(update_fields=['status'])
-        next_url = request.POST.get('next') or 'reminders:list'
-        if next_url.startswith('/'):
-            return redirect(next_url)
-        return redirect('reminders:list')
+        messages.success(request, 'Напоминание отмечено выполненным.')
+        return safe_redirect(request, fallback='reminders:list')
 
 
 class ReminderDismissView(LoginRequiredMixin, View):
@@ -35,6 +34,7 @@ class ReminderDismissView(LoginRequiredMixin, View):
         reminder = get_object_or_404(Reminder, pk=pk, user=request.user)
         reminder.status = 'DISMISSED'
         reminder.save(update_fields=['status'])
+        messages.info(request, 'Напоминание скрыто.')
         return redirect('reminders:list')
 
 

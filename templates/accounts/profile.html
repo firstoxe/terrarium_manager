@@ -9,6 +9,8 @@
         <p class="tm-page-lede">Данные вашего аккаунта.</p>
     </div>
     <div class="tm-actions">
+        <a href="{% url 'accounts:onboarding' %}" class="btn btn-outline-secondary">Настройка</a>
+        <a href="{% url 'accounts:telegram_link' %}" class="btn btn-outline-secondary">Telegram</a>
         <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">Редактировать</a>
     </div>
 </div>
@@ -18,6 +20,7 @@
         <dt>Имя пользователя</dt><dd>{{ user.username }}</dd>
         <dt>Email</dt><dd>{{ user.email|default:"не указан" }}</dd>
         <dt>Телефон</dt><dd>{{ user.phone|default:"не указан" }}</dd>
+        <dt>Telegram</dt><dd>{{ user.telegram_chat_id|default:"не привязан" }}</dd>
         {% if user.first_name or user.last_name %}
         <dt>Имя</dt><dd>{{ user.first_name }} {{ user.last_name }}</dd>
         {% endif %}

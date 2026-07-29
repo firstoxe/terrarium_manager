@@ -27,6 +27,8 @@ class AnimalListView(LoginRequiredMixin, SingleTableView):
         return self.filterset.qs
 
     def get_context_data(self, **kwargs):
+        from urllib.parse import urlencode
+
         context = super().get_context_data(**kwargs)
         context['filter'] = self.filterset
         view_mode = self.request.GET.get('view') or self.request.session.get('animal_list_view', 'table')
@@ -35,6 +37,19 @@ class AnimalListView(LoginRequiredMixin, SingleTableView):
         self.request.session['animal_list_view'] = view_mode
         context['view_mode'] = view_mode
         context['animals'] = context['object_list']
+        context['has_results'] = bool(context['object_list'])
+        context['filters_active'] = any(
+            self.request.GET.get(key)
+            for key in ('name', 'species', 'sex', 'habitat', 'care_level')
+        )
+        params = self.request.GET.copy()
+        params.pop('page', None)
+        params_table = params.copy()
+        params_table['view'] = 'table'
+        params_cards = params.copy()
+        params_cards['view'] = 'cards'
+        context['view_query_table'] = urlencode(params_table, doseq=True)
+        context['view_query_cards'] = urlencode(params_cards, doseq=True)
         return context
 
 class AnimalDetailView(LoginRequiredMixin, DetailView):
@@ -90,6 +105,11 @@ class AnimalCreateView(LoginRequiredMixin, CreateView):
     model = Animal
     form_class = AnimalForm
     template_name = 'animals/animal_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_initial(self):
         initial = super().get_initial()
@@ -157,6 +177,11 @@ class AnimalUpdateView(LoginRequiredMixin, UpdateView):
     model = Animal
     form_class = AnimalForm
     template_name = 'animals/animal_form.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
     def get_queryset(self):
         return animals_for_user(self.request.user)

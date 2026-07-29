@@ -69,9 +69,10 @@ sh scripts/backup_db.sh
 
 ## Медиафайлы
 
-Загруженные фотографии находятся в `MEDIA_ROOT` (`media/` по умолчанию).
-В production раздавайте `/media/` через nginx или объектное хранилище и
-резервируйте этот каталог отдельно от базы данных.
+В Docker `nginx` отдаёт `/media/` из volume `media_data`, а приложение —
+через gunicorn + WhiteNoise для `/static/`.
+
+Локально (`runserver`) media раздаётся только при `DEBUG=True`.
 
 ## Переменные окружения
 

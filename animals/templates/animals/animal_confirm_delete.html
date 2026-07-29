@@ -11,11 +11,12 @@
 </div>
 
 <div class="tm-form-card" style="max-width:560px">
-    <p class="mb-0">Вы уверены, что хотите удалить <strong>«{{ object }}»</strong>?</p>
+    <p>Вы уверены, что хотите удалить <strong>«{{ object }}»</strong>?</p>
+    <p class="small text-muted">Будут удалены расписание кормления, история веса/визитов/линек, действия, фото и записи на таймлайне. Это нельзя отменить.</p>
     <form method="post">
         {% csrf_token %}
         <div class="tm-form-actions">
-            <button type="submit" class="btn btn-danger">Удалить</button>
+            <button type="submit" class="btn btn-danger">Удалить навсегда</button>
             <a href="{% url 'animals:animal_detail' object.pk %}" class="btn btn-outline-secondary">Отмена</a>
         </div>
     </form>

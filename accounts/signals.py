@@ -8,18 +8,17 @@ from .models import User
 
 @receiver(post_save, sender=User)
 def notify_admins_on_registration(sender, instance, created, **kwargs):
-    if created and not instance.is_staff:
-        # Отправка email администраторам
-        subject = 'Новая регистрация на сайте'
-        message = render_to_string('accounts/emails/new_user_admin_email.txt', {
-            'user': instance,
-            'admin_url': f"{settings.SITE_URL}/admin/accounts/user/{instance.id}/change/"
-        })
-
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[a[1] for a in settings.ADMINS],
-            fail_silently=True
-        )
+    if not (created and not instance.is_staff and settings.ADMINS):
+        return
+    subject = 'Новая регистрация на сайте'
+    message = render_to_string('accounts/emails/new_user_admin_email.txt', {
+        'user': instance,
+        'admin_url': f"{settings.SITE_URL}/admin/accounts/user/{instance.id}/change/"
+    })
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[a[1] for a in settings.ADMINS],
+        fail_silently=True,
+    )

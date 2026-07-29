@@ -10,11 +10,14 @@ from .models import WeightLog, HealthRecord, SheddingLog
 
 
 class AnimalHealthMixin(LoginRequiredMixin):
-    http_method_names = ['post']
+    http_method_names = ['get', 'post']
 
     def dispatch(self, request, *args, **kwargs):
         self.animal = get_object_or_404(animals_for_user(request.user), pk=kwargs['animal_id'])
         return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return redirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse('animals:animal_detail', kwargs={'pk': self.animal.pk}) + self.success_hash
@@ -27,7 +30,13 @@ class AnimalHealthMixin(LoginRequiredMixin):
         return super().form_valid(form)
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Не удалось сохранить — проверьте поля.')
+        for field, errors in form.errors.items():
+            label = form.fields[field].label if field in form.fields else field
+            for error in errors:
+                messages.error(self.request, f'{label}: {error}')
+        if form.non_field_errors():
+            for error in form.non_field_errors():
+                messages.error(self.request, error)
         return redirect(self.get_success_url())
 
 

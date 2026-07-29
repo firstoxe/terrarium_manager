@@ -188,6 +188,7 @@
             <span class="small text-muted">Не в вашей базе</span>
             <form method="post" action="{% url 'animals:species_library_import' entry.id %}" class="d-inline">
                 {% csrf_token %}
+                {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
                 <button type="submit" name="create_animal" value="1" class="btn btn-sm btn-primary">В базу и создать</button>
                 <button type="submit" class="btn btn-sm btn-outline-primary">Только в базу</button>
             </form>

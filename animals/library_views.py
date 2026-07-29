@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView
 
+from terrarium_manager.redirects import safe_redirect
 from .services.species_library import (
     get_entry,
     import_entry,
@@ -97,5 +98,5 @@ class SpeciesLibraryImportView(LoginRequiredMixin, View):
 
         next_url = request.POST.get('next') or request.GET.get('next')
         if next_url:
-            return redirect(next_url)
+            return safe_redirect(request, next_url, fallback='animals:species_library')
         return redirect('animals:species_library')

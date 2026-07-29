@@ -92,12 +92,51 @@ def test_reminder_generate(auth_client, user):
 
 
 @pytest.mark.django_db
-def test_telegram_webhook(client, user):
+def test_telegram_webhook(client, user, settings):
+    from django.core.signing import TimestampSigner
+
+    settings.TELEGRAM_WEBHOOK_SECRET = 'secret-token'
+    settings.RATELIMIT_ENABLE = False
+    token = TimestampSigner(salt='telegram-link').sign(str(user.pk))
     response = client.post(
         reverse('accounts:telegram_webhook'),
-        data='{"message":{"chat":{"id":12345},"text":"/start %s"}}' % user.username,
+        data='{"message":{"chat":{"id":12345},"text":"/start %s"}}' % token,
         content_type='application/json',
+        HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN='secret-token',
     )
     assert response.status_code == 200
     user.refresh_from_db()
     assert user.telegram_chat_id == '12345'
+
+
+@pytest.mark.django_db
+def test_telegram_webhook_rejects_bad_secret(client, user, settings):
+    from django.core.signing import TimestampSigner
+
+    settings.TELEGRAM_WEBHOOK_SECRET = 'secret-token'
+    settings.RATELIMIT_ENABLE = False
+    token = TimestampSigner(salt='telegram-link').sign(str(user.pk))
+    response = client.post(
+        reverse('accounts:telegram_webhook'),
+        data='{"message":{"chat":{"id":999},"text":"/start %s"}}' % token,
+        content_type='application/json',
+        HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN='wrong',
+    )
+    assert response.status_code == 200
+    user.refresh_from_db()
+    assert user.telegram_chat_id != '999'
+
+
+@pytest.mark.django_db
+def test_telegram_webhook_ignores_username(client, user, settings):
+    settings.TELEGRAM_WEBHOOK_SECRET = 'secret-token'
+    settings.RATELIMIT_ENABLE = False
+    response = client.post(
+        reverse('accounts:telegram_webhook'),
+        data='{"message":{"chat":{"id":42},"text":"/start %s"}}' % user.username,
+        content_type='application/json',
+        HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN='secret-token',
+    )
+    assert response.status_code == 200
+    user.refresh_from_db()
+    assert not user.telegram_chat_id or user.telegram_chat_id != '42'
