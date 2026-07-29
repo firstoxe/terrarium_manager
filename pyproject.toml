@@ -3,7 +3,7 @@ name = "terrarium-manager"
 version = "0.1.0"
 description = "Django app for terrarium animal management"
 readme = "README.md"
-requires-python = ">=3.10,<3.15"
+requires-python = ">=3.12,<3.15"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "terrarium_manager.settings"
