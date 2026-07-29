@@ -1,0 +1,9 @@
+{
+  "name": "Terrarium Manager",
+  "short_name": "Terrarium",
+  "start_url": "/dashboard/",
+  "display": "standalone",
+  "background_color": "#212529",
+  "theme_color": "#212529",
+  "lang": "ru"
+}

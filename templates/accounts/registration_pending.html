@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Ожидание одобрения — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-auth" style="width:min(520px,100%); text-align:center">
+    <h1>Регистрация отправлена</h1>
+    <p class="lede">
+        Аккаунт создан и ждёт одобрения администратором.
+        После одобрения вы сможете войти.
+    </p>
+    <a href="{% url 'accounts:login' %}" class="btn btn-primary">Перейти ко входу</a>
+</div>
+{% endblock %}

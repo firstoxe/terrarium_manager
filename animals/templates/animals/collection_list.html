@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Коллекции — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Мои коллекции</h1>
+        <p class="tm-page-lede">Группы животных внутри вашего аккаунта.</p>
+    </div>
+</div>
+
+<div class="card">
+    <ul class="list-group list-group-flush">
+        {% for collection in collections %}
+        <li class="list-group-item d-flex justify-content-between">
+            <strong>{{ collection.name }}</strong>
+            <span class="text-muted">{{ collection.animals.count }} животных</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">Коллекции не созданы</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

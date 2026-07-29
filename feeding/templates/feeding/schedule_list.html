@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Кормление — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Расписание кормления</h1>
+        <p class="tm-page-lede">Кого кормить, когда и чем — с отметкой «Покормил» в один клик.</p>
+    </div>
+    <div class="tm-actions">
+        <a href="{% url 'feeding:history' %}" class="btn btn-outline-secondary">История</a>
+    </div>
+</div>
+
+{% if schedules %}
+<div class="tm-table-wrap">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Животное</th>
+                    <th>Корм</th>
+                    <th>Интервал</th>
+                    <th>Последнее</th>
+                    <th>Следующее</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for schedule in schedules %}
+                <tr {% if schedule.is_overdue %}class="tm-row-alert"{% endif %}>
+                    <td>
+                        <a href="{% url 'animals:animal_detail' schedule.animal.pk %}">{{ schedule.animal.name }}</a>
+                    </td>
+                    <td>{{ schedule.food_type }} ({{ schedule.amount }})</td>
+                    <td>{{ schedule.interval_days }} дн.</td>
+                    <td>{{ schedule.last_fed|date:"d.m.Y H:i"|default:"—" }}</td>
+                    <td>
+                        {{ schedule.next_feed_date|date:"d.m.Y H:i" }}
+                        {% if schedule.is_overdue %}<span class="tm-chip is-danger ms-1">Просрочено</span>{% endif %}
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <form method="post" action="{% url 'feeding:feed_today' schedule.animal.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success">Покормил</button>
+                        </form>
+                        <a href="{% url 'feeding:schedule_edit' schedule.pk %}" class="btn btn-sm btn-outline-secondary">Изменить</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="tm-form-card text-center">
+    <h2 class="h4 mb-2">Расписаний пока нет</h2>
+    <p class="tm-page-lede mx-auto mb-3">Откройте карточку животного и добавьте расписание кормления — оно появится здесь.</p>
+    <div class="tm-actions justify-content-center">
+        <a href="{% url 'animals:animal_list' %}" class="btn btn-primary">К животным</a>
+        <a href="{% url 'feeding:history' %}" class="btn btn-outline-secondary">История</a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

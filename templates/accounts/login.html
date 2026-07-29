@@ -1,25 +1,21 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
 
+{% block title %}Вход — Terrarium Manager{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Вход в систему</h3>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <button type="submit" class="btn btn-success w-100 mt-3">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>Войти
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+<div class="tm-auth">
+    <h1>Вход</h1>
+    <p class="lede">Войдите, чтобы вести коллекцию, кормления и справочник видов.</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary w-100 mt-3">Войти</button>
+    </form>
+    <div class="text-center mt-3 small">
+        <a href="{% url 'accounts:register' %}">Создать аккаунт</a>
+        ·
+        <a href="{% url 'accounts:password_reset' %}">Забыли пароль?</a>
     </div>
 </div>
 {% endblock %}

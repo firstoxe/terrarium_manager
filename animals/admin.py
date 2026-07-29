@@ -1,12 +1,12 @@
 # animals/admin.py
 from django.contrib import admin
-from .models import Animal, Taxonomy, Morph, Action, CareRequirement
+from .models import Animal, Taxonomy, Morph, Action, CareRequirement, AnimalPhoto, Collection
 
 
 @admin.register(Taxonomy)
 class TaxonomyAdmin(admin.ModelAdmin):
-    list_display = ('species', 'scientific_name', 'genus', 'family')
-    search_fields = ('species', 'scientific_name', 'genus', 'family', 'class_name', 'order')
+    list_display = ('species', 'scientific_name', 'common_name', 'library_id', 'genus', 'family')
+    search_fields = ('species', 'scientific_name', 'common_name', 'library_id', 'genus', 'family', 'class_name', 'order')
     list_filter = ('class_name', 'order', 'family')
     ordering = ('species',)
 
@@ -37,6 +37,17 @@ class ActionAdmin(admin.ModelAdmin):
     ordering = ('-date',)
     raw_id_fields = ('animal', 'created_by')
     list_select_related = ('animal', 'created_by')
+
+
+@admin.register(AnimalPhoto)
+class AnimalPhotoAdmin(admin.ModelAdmin):
+    list_display = ('animal', 'date', 'caption')
+
+
+@admin.register(Collection)
+class CollectionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'owner', 'is_global')
+    list_filter = ('is_global',)
 
 
 @admin.register(CareRequirement)

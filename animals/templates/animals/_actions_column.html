@@ -1,15 +1,15 @@
 <div class="btn-group">
-    <a href="{% url 'animals:detail' record.pk %}"
+    <a href="{% url 'animals:animal_detail' record.pk %}"
        class="btn btn-sm btn-outline-primary"
        title="Просмотр">
         <i class="bi bi-eye"></i>
     </a>
-    <a href="{% url 'animals:update' record.pk %}"
-       class="btn btn-sm btn-outline-warning"
+    <a href="{% url 'animals:animal_update' record.pk %}"
+       class="btn btn-sm btn-outline-secondary"
        title="Редактировать">
         <i class="bi bi-pencil"></i>
     </a>
-    <a href="{% url 'animals:delete' record.pk %}"
+    <a href="{% url 'animals:animal_delete' record.pk %}"
        class="btn btn-sm btn-outline-danger"
        title="Удалить">
         <i class="bi bi-trash"></i>

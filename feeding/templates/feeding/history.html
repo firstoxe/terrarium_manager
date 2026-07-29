@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}История кормлений — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>История кормлений</h1>
+        <p class="tm-page-lede">Все записи кормлений по вашей коллекции.</p>
+    </div>
+    <div class="tm-actions">
+        <a href="{% url 'feeding:schedule_list' %}" class="btn btn-outline-secondary">К расписанию</a>
+    </div>
+</div>
+
+{% if logs %}
+<div class="tm-table-wrap">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr><th>Дата</th><th>Животное</th><th>Корм</th><th>Кол-во</th><th>Заметки</th></tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.date|date:"d.m.Y H:i" }}</td>
+                    <td><a href="{% url 'animals:animal_detail' log.animal.pk %}">{{ log.animal.name }}</a></td>
+                    <td>{{ log.food_type }}</td>
+                    <td>{{ log.amount }}</td>
+                    <td>{{ log.notes|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include "pagination.html" %}
+{% else %}
+<div class="alert alert-info">История кормлений пуста.</div>
+{% endif %}
+{% endblock %}

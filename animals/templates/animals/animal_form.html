@@ -1,10 +1,77 @@
 {% extends "base.html" %}
-{% load crispy_forms_filters %}
-{% load static crispy_forms_tags %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}Редактировать{% else %}Новое{% endif %} животное — Terrarium Manager{% endblock %}
 
 {% block content %}
-    <script>
-    $(document).ready(function () {
+<div class="tm-page-header">
+    <div>
+        <h1>{% if object %}Редактировать{% else %}Новое животное{% endif %}</h1>
+        <p class="tm-page-lede">Сначала выберите вид из справочника — так подтянутся уход и морфы.</p>
+    </div>
+    <div class="tm-actions">
+        {% if not object %}
+        <a href="{% url 'animals:species_library' %}?care_level=BEGINNER&scope=popular" class="btn btn-primary">Выбрать из справочника</a>
+        <a href="{% url 'animals:species_library' %}" class="btn btn-outline-secondary">Весь каталог</a>
+        {% else %}
+        <a href="{% url 'animals:animal_detail' object.pk %}" class="btn btn-outline-secondary">К карточке</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="tm-form-card">
+    {% crispy form %}
+</div>
+
+<div class="modal fade" id="taxonomyModal" tabindex="-1" aria-labelledby="taxonomyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taxonomyModalLabel">Добавить таксон</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <form id="taxonomy-form" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="taxonomy_submit" value="1">
+                    {{ taxonomy_form|crispy }}
+                    <div class="tm-form-actions">
+                        <button type="submit" class="btn btn-primary">Сохранить таксон</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="morphModal" tabindex="-1" aria-labelledby="morphModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="morph-container2">
+            <div class="modal-header">
+                <h5 class="modal-title" id="morphModalLabel">Добавить морфу</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                {{ morph_form.media }}
+                <form id="morph-form" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="morph_submit" value="1">
+                    {{ morph_form|crispy }}
+                    <div class="tm-form-actions">
+                        <button type="submit" class="btn btn-primary">Сохранить морфу</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+$(document).ready(function () {
     $('#taxonomyModal, #morphModal').on('shown.bs.modal', function () {
         $(this).find('select').each(function () {
             if (!$(this).hasClass('select2-hidden-accessible')) {
@@ -18,134 +85,56 @@
         });
     });
 });
-    </script>
-    <div class="container mt-4">
-        <div class="card shadow-lg">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0">
-                    {% if object %}Редактировать животное{% else %}Добавить новое животное{% endif %}
-                </h3>
-            </div>
-            <div class="card-body">
-                {% csrf_token %}
-                {% crispy form %}
 
-            </div>
-        </div>
-        <div class="modal fade" id="taxonomyModal" tabindex="-1" aria-labelledby="taxonomyModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="taxonomyModalLabel">Добавить новый таксон</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="taxonomy-form" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="taxonomy_submit" value="1">
-                        {{ taxonomy_form|crispy }}
-                        <button type="submit" class="btn btn-primary">Сохранить таксон</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-        <div class="modal fade" id="morphModal" aria-labelledby="morphModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" id="morph-container2">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="morphModalLabel">Добавить новую морфу</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        {{ morph_form.media }}
-                        <form id="morph-form" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="morph_submit" value="1">
-                            {{ morph_form|crispy }}
-                            <button type="submit" class="btn btn-primary">Сохранить морфу</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+document.addEventListener('DOMContentLoaded', function () {
+    const taxonomyForm = document.getElementById('taxonomy-form');
+    const taxonomySelect = document.querySelector('#id_taxonomy_animal') || document.querySelector('#id_taxonomy');
+    const morphForm = document.getElementById('morph-form');
+    const morphSelect = document.querySelector('#id_morph');
 
-    </div>
-
-{% endblock %}
-
-{% block extra_scripts %}
-    <style>
-        .select2-container {
-            width: 100% !important;
-        }
-
-        .select2-dropdown {
-            z-index: 1060 !important; /* Выше модального окна (Bootstrap modal z-index: 1055) */
-        }
-
-        .modal .select2-container {
-            z-index: 1060 !important;
-        }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-
-            const taxonomyForm = document.getElementById('taxonomy-form');
-            const taxonomySelect = document.querySelector('#id_taxonomy');
-
-            taxonomyForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const formData = new FormData(taxonomyForm);
-
-                fetch("{% url 'animals:animal_create' %}", {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const newOption = new Option(data.scientific_name, data.id, true, true);
-                            $(taxonomySelect).append(newOption).trigger('change');
-                            bootstrap.Modal.getInstance(document.getElementById('taxonomyModal')).hide();
-                        } else {
-                            alert('Ошибка: ' + JSON.stringify(data.errors));
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            });
-            const morphForm = document.getElementById('morph-form');
-            const morphSelect = document.querySelector('#id_morph');
-
-            morphForm.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const formData = new FormData(morphForm);
-
-                fetch("{% url 'animals:animal_create' %}", {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            const newOption = new Option(data.name, data.id, true, true);
-                            $(morphSelect).append(newOption).trigger('change');
-                            bootstrap.Modal.getInstance(document.getElementById('morphModal')).hide();
-                        } else {
-                            alert('Ошибка: ' + JSON.stringify(data.errors));
-                        }
-                    })
-                    .catch(error => console.error('Error:', error));
-            });
+    if (taxonomyForm) {
+        taxonomyForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            fetch("{% url 'animals:animal_create' %}", {
+                method: 'POST',
+                body: new FormData(taxonomyForm),
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const newOption = new Option(data.scientific_name, data.id, true, true);
+                    $(taxonomySelect).append(newOption).trigger('change');
+                    bootstrap.Modal.getInstance(document.getElementById('taxonomyModal')).hide();
+                } else {
+                    alert('Ошибка: ' + JSON.stringify(data.errors));
+                }
+            })
+            .catch(err => console.error(err));
         });
+    }
 
-    </script>
-
+    if (morphForm) {
+        morphForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            fetch("{% url 'animals:animal_create' %}", {
+                method: 'POST',
+                body: new FormData(morphForm),
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const newOption = new Option(data.name, data.id, true, true);
+                    $(morphSelect).append(newOption).trigger('change');
+                    bootstrap.Modal.getInstance(document.getElementById('morphModal')).hide();
+                } else {
+                    alert('Ошибка: ' + JSON.stringify(data.errors));
+                }
+            })
+            .catch(err => console.error(err));
+        });
+    }
+});
+</script>
 {% endblock %}

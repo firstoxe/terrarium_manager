@@ -1,6 +1,17 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+
+class ApprovedUserManager(UserManager):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+        # Superusers are trusted by definition — never leave them pending approval.
+        extra_fields.setdefault('is_approved', True)
+        return super().create_superuser(username, email, password, **extra_fields)
+
 
 class User(AbstractUser):
     is_approved = models.BooleanField(
@@ -18,6 +29,8 @@ class User(AbstractUser):
         _('Registration date'),
         auto_now_add=True
     )
+
+    objects = ApprovedUserManager()
 
     class Meta:
         verbose_name = _('User')

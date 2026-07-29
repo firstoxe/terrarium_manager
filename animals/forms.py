@@ -2,9 +2,10 @@ from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Button, Layout, Div, Row, Field, HTML
 from django import forms
+from django.urls import reverse
 from django_select2.forms import ModelSelect2Widget
 
-from .models import Animal, Species, Action, Taxonomy, Morph
+from .models import Animal, Action, Taxonomy, Morph
 
 
 class MySelect2WidgetMorph(ModelSelect2Widget):
@@ -62,11 +63,18 @@ class MySelect2WidgetMorphTaxonomy(ModelSelect2Widget):  # Новый видже
 class AnimalForm(forms.ModelForm):
     class Meta:
         model = Animal
-        fields = ['name', 'taxonomy', 'morph', 'birth_date', 'sex', 'photo', 'notes', 'habitat', 'care_level']
+        fields = ['name', 'taxonomy', 'morph', 'birth_date', 'acquisition_date', 'sex', 'photo', 'notes', 'habitat', 'care_level']
         widgets = {
             'taxonomy': MySelect2WidgetTaxonomy(attrs={'data-minimum-input-length': 0, 'style': 'width: 100%;'}),
             'morph': MySelect2WidgetMorph(attrs={'data-minimum-input-length': 0, 'style': 'width: 100%;'}),
             'birth_date': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'form-control',
+                    'placeholder': 'Выберите дату'
+                },
+                format='%Y-%m-%d'),
+            'acquisition_date': forms.DateInput(
                 attrs={
                     'type': 'date',
                     'class': 'form-control',
@@ -81,14 +89,15 @@ class AnimalForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(AnimalForm, self).__init__(*args, **kwargs)
+        self.fields['taxonomy'].queryset = Taxonomy.objects.all().order_by('scientific_name')
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.help_text_inline = True
         self.helper.html5_required = True
         self.helper.form_class = 'form-small'
         self.helper.label_class = ''
+        library_url = reverse('animals:species_library')
         photo_field = Div(
-            # Если есть текущее фото, показываем его
             HTML('''
                         {% if form.instance.photo %}
                             <img src="{{ form.instance.photo.url }}" class="img-fluid rounded mb-2" style="max-width: 200px;">
@@ -100,12 +109,22 @@ class AnimalForm(forms.ModelForm):
         )
 
         self.helper.layout = Layout(
+            HTML(
+                f'<div class="alert alert-info mb-3">'
+                f'<strong>Рекомендуем:</strong> сначала выберите вид в '
+                f'<a href="{library_url}">справочнике</a> и нажмите «Добавить в базу» — '
+                f'тогда уход и морфы подтянутся автоматически.'
+                f'</div>'
+            ),
             Row(
                 Div(Field('name', css_class='form-control'), css_class='col-md-6 mb-3'),
                 Div(
                     Field('taxonomy', css_class='form-control '),
                     HTML(
-                        '<button type="button" class="btn btn-success btn-sm mt-2" id="add-taxonomy-btn" data-bs-toggle="modal" data-bs-target="#taxonomyModal"><i class="bi bi-plus-circle"></i> Добавить таксон</button>'),
+                        f'<a href="{library_url}" class="btn btn-primary btn-sm mt-2 me-2">Выбрать из справочника</a>'
+                        '<button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="add-taxonomy-btn" '
+                        'data-bs-toggle="modal" data-bs-target="#taxonomyModal">Редкий вид вручную</button>'
+                    ),
                     css_class='col-md-6 mb-3', id='taxonomy-container'
                 ),
             ),
@@ -113,17 +132,22 @@ class AnimalForm(forms.ModelForm):
                 Div(
                     Field('morph', css_class='form-control'),
                     HTML(
-                        '<button type="button" class="btn btn-success btn-sm mt-2" id="add-morph-btn" data-bs-toggle="modal" data-bs-target="#morphModal"><i class="bi bi-plus-circle"></i> Добавить морфу</button>'),
+                        '<button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="add-morph-btn" '
+                        'data-bs-toggle="modal" data-bs-target="#morphModal">Добавить морфу</button>'
+                    ),
                     css_class='col-md-6 mb-3', id='morph-container'
                 ),
                 Div(Field('sex', css_class='form-control'), css_class='col-md-6 mb-3'),
             ),
             Row(
                 Div(Field('birth_date', css_class='form-control'), css_class='col-md-6 mb-3'),
-                Div(Field('habitat', css_class='form-control'), css_class='col-md-6 mb-3'),
+                Div(Field('acquisition_date', css_class='form-control'), css_class='col-md-6 mb-3'),
             ),
             Row(
+                Div(Field('habitat', css_class='form-control'), css_class='col-md-6 mb-3'),
                 Div(Field('care_level', css_class='form-control'), css_class='col-md-6 mb-3'),
+            ),
+            Row(
                 photo_field,
             ),
             Row(
@@ -131,9 +155,11 @@ class AnimalForm(forms.ModelForm):
             ),
             FormActions(
                 HTML(
-                    '<button type="submit" class="btn btn-primary me-2"><i class="bi bi-save"></i> Сохранить</button>'),
-                HTML(
-                    '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Отмена</button>'),
+                    f'<div class="tm-form-actions">'
+                    f'<button type="submit" class="btn btn-primary">Сохранить</button>'
+                    f'<a href="{reverse("animals:animal_list")}" class="btn btn-outline-secondary">Отмена</a>'
+                    f'</div>'
+                ),
             ),
         )
 
@@ -189,21 +215,21 @@ class ActionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_method = 'post'
+        self.helper.form_tag = False
         self.helper.help_text_inline = True
         self.helper.html5_required = True
         self.helper.form_class = 'form-small'
-        self.helper.label_class = ''
-        # self.helper.form_tag = False
         self.helper.layout = Layout(
-            Row(Div(Field('action_type', css_class='form-control'),),),
-            Row(Div(Field('description', css_class='form-control'),),),
-            Row(Div(Field('cost', css_class='form-control'), )),
+            Field('action_type', css_class='form-select mb-3'),
+            Field('description', css_class='form-control mb-3'),
+            Field('cost', css_class='form-control mb-3'),
             FormActions(
                 HTML(
-                    '<button type="submit" class="btn btn-primary mt-2"><i class="bi bi-save"></i> Добавить действие</button>'),
-                HTML(
-                    '<button type="button" class="btn btn-secondary mt-2 ms-2" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Отмена</button>'),
+                    '<div class="tm-form-actions">'
+                    '<button type="submit" class="btn btn-primary">Добавить действие</button>'
+                    '<button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>'
+                    '</div>'
+                ),
             ),
         )
 

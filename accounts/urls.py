@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from .forms import CustomAuthenticationForm
 
 app_name = 'accounts'
 
@@ -14,7 +15,9 @@ urlpatterns = [
     path('approve/<int:user_id>/', views.approve_user, name='approve_user'),
     # Стандартные auth views
     path('login/', auth_views.LoginView.as_view(
-        template_name='accounts/login.html'), name='login'),
+        template_name='accounts/login.html',
+        authentication_form=CustomAuthenticationForm,
+    ), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ]
 

@@ -1,31 +1,26 @@
 {% extends "base.html" %}
 
+{% block title %}Профиль — Terrarium Manager{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5>Профиль пользователя</h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <strong>Имя пользователя:</strong> {{ user.username }}
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Email:</strong> {{ user.email|default:"не указан" }}
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Телефон:</strong> {{ user.phone|default:"не указан" }}
-                    </li>
-                </ul>
-                <div class="card-footer">
-                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-warning">
-                        <i class="bi bi-pencil-square me-2"></i>Редактировать
-                    </a>
-                </div>
-            </div>
-        </div>
+<div class="tm-page-header">
+    <div>
+        <h1>Профиль</h1>
+        <p class="tm-page-lede">Данные вашего аккаунта.</p>
     </div>
+    <div class="tm-actions">
+        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">Редактировать</a>
+    </div>
+</div>
+
+<div class="tm-form-card" style="max-width:520px">
+    <dl class="tm-kv">
+        <dt>Имя пользователя</dt><dd>{{ user.username }}</dd>
+        <dt>Email</dt><dd>{{ user.email|default:"не указан" }}</dd>
+        <dt>Телефон</dt><dd>{{ user.phone|default:"не указан" }}</dd>
+        {% if user.first_name or user.last_name %}
+        <dt>Имя</dt><dd>{{ user.first_name }} {{ user.last_name }}</dd>
+        {% endif %}
+    </dl>
 </div>
 {% endblock %}

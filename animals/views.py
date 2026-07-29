@@ -1,12 +1,13 @@
-from datetime import timedelta
-
-from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect
-from django.utils import timezone
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Animal, Species, Action, Taxonomy, Morph
+from .models import Animal, Action, Taxonomy, Morph, CareRequirement, AnimalPhoto
+from .services.costs import action_costs_by_period
+from .services.ownership import animals_for_user
+from .services.timeline import build_timeline
+from .filters import AnimalFilter
 from .forms import AnimalForm, ActionForm, TaxonomyForm, MorphForm
 from django.urls import reverse_lazy, reverse
 
@@ -21,35 +22,34 @@ class AnimalListView(LoginRequiredMixin, SingleTableView):
     paginate_by = 10
 
     def get_queryset(self):
-        return Animal.objects.filter(owner=self.request.user).select_related('taxonomy', 'morph')
+        qs = animals_for_user(self.request.user)
+        self.filterset = AnimalFilter(self.request.GET, queryset=qs)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filterset
+        return context
 
 class AnimalDetailView(LoginRequiredMixin, DetailView):
     model = Animal
     template_name = 'animals/animal_detail.html'
 
     def get_queryset(self):
-        return Animal.objects.filter(owner=self.request.user).select_related('taxonomy', 'morph')
+        return animals_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         actions = self.object.action_set.all()
         context['action_table'] = ActionTable(actions)
-        # context['actions'] = self.object.action_set.all().order_by('-date')
         context['action_form'] = ActionForm()
-
-        # Подсчёт затрат
-        now = timezone.now()
-        week_ago = now - timedelta(days=7)
-        month_ago = now - timedelta(days=30)
-        year_ago = now - timedelta(days=365)
-
-        # Суммируем затраты за каждый период, исключая None
-        context['costs'] = {
-            'week': sum(action.cost for action in actions.filter(date__gte=week_ago) if action.cost is not None),
-            'month': sum(action.cost for action in actions.filter(date__gte=month_ago) if action.cost is not None),
-            'year': sum(action.cost for action in actions.filter(date__gte=year_ago) if action.cost is not None),
-        }
-
+        context['costs'] = action_costs_by_period(actions)
+        context['care_requirement'] = CareRequirement.objects.filter(
+            taxonomy=self.object.taxonomy,
+        ).first()
+        context['timeline'] = build_timeline(self.object)
+        context['photos'] = self.object.photos.all()
+        context['feeding_schedule'] = getattr(self.object, 'feeding_schedule', None)
         return context
 
 
@@ -57,6 +57,13 @@ class AnimalCreateView(LoginRequiredMixin, CreateView):
     model = Animal
     form_class = AnimalForm
     template_name = 'animals/animal_form.html'
+
+    def get_initial(self):
+        initial = super().get_initial()
+        taxonomy_id = self.request.GET.get('taxonomy')
+        if taxonomy_id:
+            initial['taxonomy'] = taxonomy_id
+        return initial
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -94,20 +101,6 @@ class AnimalCreateView(LoginRequiredMixin, CreateView):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({'errors': morph_form.errors}, status=400)
             return self.render_to_response(self.get_context_data(morph_form=morph_form))
-        elif 'actions_submit' in request.POST:
-            action_form = ActionForm(request.POST)
-            if action_form.is_valid():
-                action = action_form.save()
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({
-                        'id': action.id,
-                        'name': action.action_type,
-                        'success': True
-                    })
-                return redirect('animals:animal_create')
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'errors': action_form.errors}, status=400)
-            return self.render_to_response(self.get_context_data(action_form=action_form))
         return super().post(request, *args, **kwargs)
 
 
@@ -124,7 +117,7 @@ class AnimalUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'animals/animal_form.html'
 
     def get_queryset(self):
-        return Animal.objects.filter(owner=self.request.user)
+        return animals_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -173,7 +166,7 @@ class AnimalDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('animals:animal_list')
 
     def get_queryset(self):
-        return Animal.objects.filter(owner=self.request.user)
+        return animals_for_user(self.request.user)
 
 
 class ActionCreateView(LoginRequiredMixin, CreateView):
@@ -182,7 +175,10 @@ class ActionCreateView(LoginRequiredMixin, CreateView):
     template_name = 'animals/action_form.html'
 
     def form_valid(self, form):
-        form.instance.animal = Animal.objects.get(pk=self.kwargs['animal_id'], owner=self.request.user)
+        form.instance.animal = get_object_or_404(
+            animals_for_user(self.request.user),
+            pk=self.kwargs['animal_id'],
+        )
         form.instance.created_by = self.request.user
         response = super().form_valid(form)
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':

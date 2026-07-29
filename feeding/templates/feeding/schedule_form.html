@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}Редактировать{% else %}Добавить{% endif %} расписание — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>{% if object %}Редактировать{% else %}Добавить{% endif %} расписание</h1>
+        <p class="tm-page-lede">Интервал, тип корма и количество порций.</p>
+    </div>
+</div>
+
+<div class="tm-form-card" style="max-width:640px">
+    <form method="post">
+        {% csrf_token %}
+        {% crispy form %}
+    </form>
+</div>
+{% endblock %}

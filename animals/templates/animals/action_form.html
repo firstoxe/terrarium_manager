@@ -1,13 +1,20 @@
 {% extends "base.html" %}
-{% load crispy_forms_filters %}
-{% load static crispy_forms_tags %}
+{% load crispy_forms_tags %}
+
+{% block title %}Добавить действие — Terrarium Manager{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card p-4">
-        <h3 class="mb-4">Добавить действие</h3>
-            {% csrf_token %}
-            {% crispy form %}
+<div class="tm-page-header">
+    <div>
+        <h1>Добавить действие</h1>
+        <p class="tm-page-lede">Кормление, уборка, лечение и другие события.</p>
     </div>
+</div>
+
+<div class="tm-form-card" style="max-width:640px">
+    <form method="post">
+        {% csrf_token %}
+        {% crispy form %}
+    </form>
 </div>
 {% endblock %}

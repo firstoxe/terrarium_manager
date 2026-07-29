@@ -4,38 +4,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#1f3d2f">
     <title>{% block title %}Terrarium Manager{% endblock %}</title>
     <link href="{% static 'css/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'fonts/bootstrap/font/bootstrap-icons.min.css' %}">
-
     <link href="{% static 'css/select2/select2.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <script src="{% static 'js/bootstrap/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'js/select2/select2.full.min.js' %}"></script>
-<link rel="stylesheet" href="{% static 'css/custom.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
+<body class="tm-shell">
+    <nav class="navbar navbar-expand-lg navbar-dark tm-nav">
+        <div class="container-fluid px-3 px-lg-4">
             <a class="navbar-brand" href="{% url 'dashboard:dashboard' %}">
-                <i class="bi bi-house-door"></i> Terrarium Manager
+                <span class="tm-brand-mark"><i class="bi bi-flower2"></i></span>
+                Terrarium Manager
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <div class="d-flex align-items-center gap-2 order-lg-last ms-auto me-2 me-lg-0">
+                <button type="button" id="theme-toggle" class="tm-theme-btn" aria-label="Переключить тему" title="Тема">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Меню">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav me-auto mt-2 mt-lg-0">
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'animals:animal_list' %}">
-                            <i class="bi bi-grid"></i> Животные
-                        </a>
+                        <a class="nav-link{% if request.resolver_match.app_name == 'dashboard' %} active{% endif %}"
+                           href="{% url 'dashboard:dashboard' %}"
+                           {% if request.resolver_match.app_name == 'dashboard' %}aria-current="page"{% endif %}>Дашборд</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="% url 'feeding:schedule' %">
-                            <i class="bi bi-clock"></i> Кормление
-                        </a>
+                        <a class="nav-link{% if request.resolver_match.url_name == 'animal_list' or request.resolver_match.url_name == 'animal_detail' or request.resolver_match.url_name == 'animal_create' or request.resolver_match.url_name == 'animal_update' %} active{% endif %}"
+                           href="{% url 'animals:animal_list' %}">Животные</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'species_library' or request.resolver_match.url_name == 'species_library_import' %} active{% endif %}"
+                           href="{% url 'animals:species_library' %}">Справочник</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.app_name == 'feeding' %} active{% endif %}"
+                           href="{% url 'feeding:schedule_list' %}">Кормление</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.app_name == 'reminders' %} active{% endif %}"
+                           href="{% url 'reminders:list' %}">Напоминания</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.resolver_match.url_name == 'collection_list' %} active{% endif %}"
+                           href="{% url 'animals:collection_list' %}">Коллекции</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Ещё</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'reports:index' %}">Отчёты</a></li>
+                            <li><a class="dropdown-item" href="{% url 'incubation:list' %}">Инкубация</a></li>
+                            <li><a class="dropdown-item" href="{% url 'genetics:calculator' %}">Генетика</a></li>
+                            {% if user.is_staff %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:user_approval_list' %}">Одобрение пользователей</a></li>
+                            {% endif %}
+                        </ul>
                     </li>
                     {% endif %}
                 </ul>
@@ -43,80 +77,62 @@
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i> {{ user.username }}
+                            {{ user.username }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">
-                                <i class="bi bi-person"></i> Профиль
-                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Профиль</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">
-                                <i class="bi bi-box-arrow-right"></i> Выход
-                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Выход</a></li>
                         </ul>
                     </li>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'accounts:login' %}">
-                            <i class="bi bi-box-arrow-in-right"></i> Вход
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'accounts:register' %}">
-                            <i class="bi bi-person-plus"></i> Регистрация
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Вход</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'accounts:register' %}">Регистрация</a></li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <main class="container mt-4 flex-grow-1">
+    <main class="tm-main">
         {% if messages %}
-        <div class="col-md-8 mx-auto">
+        <div class="mb-3">
             {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
             </div>
             {% endfor %}
         </div>
         {% endif %}
-
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-dark text-light mt-4 py-3">
-        <div class="container text-center">
-            <span class="text-muted">&copy; {% now "Y" %} Terrarium Manager</span>
+    <footer class="tm-footer">
+        <div class="container-fluid px-3 px-lg-4 text-center">
+            <span>&copy; {% now "Y" %} Terrarium Manager</span>
         </div>
     </footer>
 
-    <button id="theme-toggle" class="btn btn-sm position-fixed bottom-0 end-0 m-3">
-        <i class="bi bi-moon-stars"></i>
-    </button>
-
-
-
     <script>
-    // Theme Toggle Logic
-    const themeToggle = document.getElementById('theme-toggle');
-    const savedTheme = localStorage.getItem('theme') || 'light';
-
-    document.documentElement.setAttribute('data-bs-theme', savedTheme);
-
-    themeToggle.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-        document.documentElement.setAttribute('data-bs-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-
-        themeToggle.innerHTML = newTheme === 'dark'
-            ? '<i class="bi bi-sun"></i>'
-            : '<i class="bi bi-moon-stars"></i>';
-    });
+    (function () {
+        const themeToggle = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-bs-theme', savedTheme);
+        const syncIcon = (theme) => {
+            themeToggle.innerHTML = theme === 'dark'
+                ? '<i class="bi bi-sun"></i>'
+                : '<i class="bi bi-moon-stars"></i>';
+        };
+        syncIcon(savedTheme);
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-bs-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', next);
+            localStorage.setItem('theme', next);
+            syncIcon(next);
+        });
+    })();
     </script>
     {% block extra_scripts %}{% endblock %}
 </body>

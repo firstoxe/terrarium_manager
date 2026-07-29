@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Генетика — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Генетический калькулятор</h1>
+        <p class="tm-page-lede">Оцените вероятные морфы потомства по паре животных.</p>
+    </div>
+</div>
+
+<form method="get" class="tm-panel mb-3">
+    <div class="row g-3">
+        <div class="col-md-5">
+            <label class="form-label">Самец</label>
+            <select name="male" class="form-select">
+                <option value="">—</option>
+                {% for a in animals %}{% if a.sex == 'M' %}
+                <option value="{{ a.pk }}" {% if selected_male and selected_male.pk == a.pk %}selected{% endif %}>{{ a.name }}</option>
+                {% endif %}{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-5">
+            <label class="form-label">Самка</label>
+            <select name="female" class="form-select">
+                <option value="">—</option>
+                {% for a in animals %}{% if a.sex == 'F' %}
+                <option value="{{ a.pk }}" {% if selected_female and selected_female.pk == a.pk %}selected{% endif %}>{{ a.name }}</option>
+                {% endif %}{% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Рассчитать</button>
+        </div>
+    </div>
+</form>
+
+{% if predictions %}
+<div class="tm-table-wrap">
+    <table class="table mb-0">
+        <thead><tr><th>Морфа</th><th>Вероятность</th></tr></thead>
+        <tbody>
+            {% for morph, prob in predictions.items %}
+            <tr><td>{{ morph }}</td><td>{{ prob|floatformat:0 }}%</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Отчёты — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Отчёты</h1>
+        <p class="tm-page-lede">Затраты по видам и общий итог по коллекции.</p>
+    </div>
+    <div class="tm-actions">
+        <a href="{% url 'reports:export' %}" class="btn btn-outline-primary">Экспорт CSV</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Затраты по таксонам</div>
+            <div class="tm-table-wrap border-0 rounded-0">
+                <table class="table mb-0">
+                    <thead><tr><th>Вид</th><th>Затраты</th></tr></thead>
+                    <tbody>
+                        {% for row in costs_by_taxonomy %}
+                        <tr>
+                            <td>{{ row.animal__taxonomy__species }}</td>
+                            <td>{{ row.total }} ₽</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-muted">Нет данных</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="tm-stat">
+            <div class="label">Итого затрат</div>
+            <p class="value">{{ total_costs }} ₽</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

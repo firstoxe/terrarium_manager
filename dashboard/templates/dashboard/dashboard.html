@@ -1,74 +1,113 @@
 {% extends "base.html" %}
 
+{% block title %}Дашборд — Terrarium Manager{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="row mb-4">
-        <!-- Статистика -->
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <h5><i class="bi bi-grid"></i> Животных</h5>
-                    <h2>{{ total_animals }}</h2>
-                </div>
+<div class="tm-page-header">
+    <div>
+        <h1>Сегодня в коллекции</h1>
+        <p class="tm-page-lede">Быстрый обзор кормлений, затрат и ближайших дел.</p>
+    </div>
+    <div class="tm-actions">
+        <a href="{% url 'animals:animal_create' %}" class="btn btn-primary">Добавить животное</a>
+        <a href="{% url 'animals:species_library' %}" class="btn btn-outline-secondary">Справочник</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="tm-stat">
+            <div class="label"><i class="bi bi-grid"></i> Животных</div>
+            <p class="value">{{ total_animals }}</p>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="tm-stat">
+            <div class="label"><i class="bi bi-clock-history"></i> Последнее кормление</div>
+            <p class="value" style="font-size:1.15rem">
+                {% if last_feeding %}{{ last_feeding.animal.name }}{% else %}—{% endif %}
+            </p>
+            <div class="hint">
+                {% if last_feeding %}{{ last_feeding.date|date:"d.m.Y H:i" }}{% else %}Нет данных{% endif %}
             </div>
         </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="tm-stat">
+            <div class="label"><i class="bi bi-wallet2"></i> Затраты за месяц</div>
+            <p class="value">{{ monthly_costs }} ₽</p>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="tm-stat {% if overdue_feedings %}is-alert{% endif %}">
+            <div class="label"><i class="bi bi-exclamation-circle"></i> Просрочено</div>
+            <p class="value">{{ overdue_feedings|length }}</p>
+            <div class="hint">кормлений</div>
+        </div>
+    </div>
+</div>
 
-        <!-- Последнее кормление -->
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <h5><i class="bi bi-clock"></i> Последнее кормление</h5>
-                    <p class="mb-0">
-                        {% if last_feeding %}
-                        {{ last_feeding.animal.name }} - {{ last_feeding.date|date:"d.m.Y H:i" }}
-                        {% else %}
-                        Нет данных
-                        {% endif %}
-                    </p>
-                </div>
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Кормить сегодня</span>
+                <a href="{% url 'feeding:schedule_list' %}" class="small">Все расписания</a>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for schedule in animals_due_today %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                        <div>
+                            <strong>{{ schedule.animal.name }}</strong>
+                            <div class="small text-muted">{{ schedule.food_type }}</div>
+                        </div>
+                        <form method="post" action="{% url 'feeding:feed_today' schedule.animal.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-success">Покормил</button>
+                        </form>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">Все накормлены — можно выдохнуть.</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>
 
-    <!-- Предстоящие события -->
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-warning">
-                    <h5><i class="bi bi-bell"></i> Ближайшие кормления</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for feed in upcoming_feeds %}
-                        <li class="list-group-item">
-                            {{ feed.animal.name }} - {{ feed.date|date:"d.m.Y H:i" }}
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item">Нет предстоящих кормлений</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Последние действия</div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for action in recent_actions %}
+                    <li class="list-group-item">
+                        <div class="small text-muted">{{ action.date|date:"d.m.Y H:i" }}</div>
+                        <a href="{% url 'animals:animal_detail' action.animal.pk %}">{{ action.animal.name }}</a>
+                        — {{ action.get_action_type_display }}
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">Пока нет действий</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
+    </div>
 
-        <!-- Ветеринарные визиты -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5><i class="bi bi-clipboard-pulse"></i> Ветеринарные визиты</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group">
-                        {% for vet in upcoming_vet %}
-                        <li class="list-group-item">
-                            {{ vet.animal.name }} - {{ vet.date|date:"d.m.Y" }}
-                            <span class="badge bg-primary">{{ vet.reason }}</span>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item">Нет запланированных визитов</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">Ветеринарные визиты</div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for vet in upcoming_vet %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                        <span>{{ vet.animal.name }} — {{ vet.next_visit_date|date:"d.m.Y" }}</span>
+                        <span class="tm-chip is-info">{{ vet.reason }}</span>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted">Нет запланированных визитов</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>

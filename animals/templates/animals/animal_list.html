@@ -1,43 +1,62 @@
 {% extends "base.html" %}
 {% load render_table from django_tables2 %}
 
-{% block content %}
-    <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1><i class="bi bi-grid"></i> Мои животные</h1>
-            <a href="{% url 'animals:animal_create' %}" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> Добавить
-            </a>
-        </div>
+{% block title %}Мои животные — Terrarium Manager{% endblock %}
 
-        {% render_table table %}
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Мои животные</h1>
+        <p class="tm-page-lede">Список коллекции с фильтрами и быстрым переходом к карточке.</p>
     </div>
+    <div class="tm-actions">
+        <a href="{% url 'animals:species_library' %}" class="btn btn-outline-secondary">Справочник</a>
+        <a href="{% url 'animals:animal_create' %}" class="btn btn-primary">Добавить</a>
+    </div>
+</div>
+
+<form method="get" class="tm-panel mb-3">
+    <div class="tm-filter-form">
+        {{ filter.form.as_p }}
+        <div>
+            <button type="submit" class="btn btn-outline-primary w-100">Применить</button>
+        </div>
+    </div>
+</form>
+
+{% if table.data %}
+<div class="tm-table-wrap">
+    {% render_table table %}
+</div>
+{% else %}
+<div class="tm-form-card text-center">
+    <h2 class="h4 mb-2">Коллекция пока пуста</h2>
+    <p class="tm-page-lede mx-auto mb-3">Начните со справочника: выберите вид, добавьте в базу и создайте первое животное.</p>
+    <div class="tm-actions justify-content-center">
+        <a href="{% url 'animals:species_library' %}?care_level=BEGINNER&scope=popular" class="btn btn-primary">Виды для новичков</a>
+        <a href="{% url 'animals:animal_create' %}" class="btn btn-outline-secondary">Добавить вручную</a>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_scripts %}
-    <style>
-        .animal-thumbnail {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-
-        .table td, .table th {
-            vertical-align: middle;
-        }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.clickable-row').forEach(row => {
-                row.addEventListener('click', function (e) {
-                    // Проверяем, что клик не на кнопке действий
-                    if (!e.target.closest('.btn-group')) {
-                        window.location.href = this.dataset.href;
-                    }
-                });
-            });
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.clickable-row').forEach(row => {
+        row.setAttribute('tabindex', '0');
+        row.setAttribute('role', 'link');
+        const go = () => { window.location.href = row.dataset.href; };
+        row.addEventListener('click', function (e) {
+            if (!e.target.closest('.btn-group, a, button')) go();
         });
-    </script>
+        row.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                go();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
-

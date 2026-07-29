@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Справочник видов — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Справочник видов</h1>
+        <p class="tm-page-lede">
+            Популярные виды уже можно быстро добавить в базу ({{ popular_total }}).
+            Полный каталог — {{ catalog_total }} карточек: смотрите рекомендации и импортируйте только нужное.
+        </p>
+    </div>
+    <div class="tm-actions">
+        <a href="{% url 'animals:animal_create' %}" class="btn btn-primary">Добавить животное</a>
+    </div>
+</div>
+
+<form method="get" class="tm-filter-bar tm-filter-bar--library">
+    <input type="search" name="q" value="{{ query }}" class="form-control"
+           placeholder="Поиск: эублефар, Python regius…">
+    <select name="scope" class="form-select">
+        <option value="catalog" {% if scope != 'popular' %}selected{% endif %}>Весь каталог</option>
+        <option value="popular" {% if scope == 'popular' %}selected{% endif %}>Популярные</option>
+    </select>
+    <select name="care_level" class="form-select">
+        <option value="">Любая сложность</option>
+        <option value="BEGINNER" {% if care_level == 'BEGINNER' %}selected{% endif %}>Новичок</option>
+        <option value="INTERMEDIATE" {% if care_level == 'INTERMEDIATE' %}selected{% endif %}>Средний</option>
+        <option value="EXPERT" {% if care_level == 'EXPERT' %}selected{% endif %}>Эксперт</option>
+    </select>
+    <select name="tag" class="form-select">
+        <option value="">Все категории</option>
+        <option value="gecko" {% if tag == 'gecko' %}selected{% endif %}>Гекконы</option>
+        <option value="python" {% if tag == 'python' %}selected{% endif %}>Питоны</option>
+        <option value="colubrid" {% if tag == 'colubrid' %}selected{% endif %}>Ужи / полозы</option>
+        <option value="agama" {% if tag == 'agama' %}selected{% endif %}>Агамы</option>
+        <option value="tortoise" {% if tag == 'tortoise' %}selected{% endif %}>Сухопутные черепахи</option>
+        <option value="turtle" {% if tag == 'turtle' %}selected{% endif %}>Водные черепахи</option>
+        <option value="amphibian" {% if tag == 'amphibian' %}selected{% endif %}>Амфибии</option>
+        <option value="monitor" {% if tag == 'monitor' %}selected{% endif %}>Вараны</option>
+        <option value="tegu" {% if tag == 'tegu' %}selected{% endif %}>Тегу</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Найти</button>
+</form>
+
+<div class="tm-species-grid">
+    {% for entry in entries %}
+    <article class="tm-species-card">
+        <div class="top">
+            <div class="meta-row">
+                <h3>{{ entry.common_name }}</h3>
+                {% if entry.care_level == 'BEGINNER' %}
+                <span class="tm-chip is-ok">Новичок</span>
+                {% elif entry.care_level == 'INTERMEDIATE' %}
+                <span class="tm-chip is-warn">Средний</span>
+                {% else %}
+                <span class="tm-chip is-danger">Эксперт</span>
+                {% endif %}
+            </div>
+            <p class="latin">{{ entry.scientific_name }}</p>
+
+            {% if entry.care %}
+            <dl class="tm-kv mb-3">
+                <dt>Температура</dt>
+                <dd>{{ entry.care.temperature_min }}–{{ entry.care.temperature_max }} °C</dd>
+                <dt>Влажность</dt>
+                <dd>{{ entry.care.humidity_min }}–{{ entry.care.humidity_max }} %</dd>
+                <dt>Рацион</dt>
+                <dd>{{ entry.care.diet|truncatechars:70 }}</dd>
+            </dl>
+            {% endif %}
+
+            <div class="accordion tm-accordion" id="acc-{{ entry.id }}">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#terr-{{ entry.id }}">
+                            Террариум и содержание
+                        </button>
+                    </h2>
+                    <div id="terr-{{ entry.id }}" class="accordion-collapse collapse" data-bs-parent="#acc-{{ entry.id }}">
+                        <div class="accordion-body">
+                            {% if entry.terrarium.one_individual.recommended_cm.length %}
+                            <p class="mb-2">
+                                <strong>Рекомендуемый размер:</strong>
+                                {{ entry.terrarium.one_individual.recommended_cm.length }}×{{ entry.terrarium.one_individual.recommended_cm.width }}×{{ entry.terrarium.one_individual.recommended_cm.height }} см
+                            </p>
+                            {% endif %}
+                            {% if entry.terrarium.one_individual.min_cm.length %}
+                            <p class="mb-2">
+                                <strong>Минимум:</strong>
+                                {{ entry.terrarium.one_individual.min_cm.length }}×{{ entry.terrarium.one_individual.min_cm.width }}×{{ entry.terrarium.one_individual.min_cm.height }} см
+                            </p>
+                            {% endif %}
+                            <p class="mb-2">{{ entry.terrarium.one_individual.notes|default:"Размеры уточняются — ориентируйтесь на рекомендации по виду." }}</p>
+                            <p class="mb-0">
+                                <strong>Несколько особей:</strong>
+                                {% if entry.terrarium.multi.allowed == True %}допустимо{% elif entry.terrarium.multi.allowed == False %}не рекомендуется{% else %}уточняется{% endif %}
+                                {% if entry.terrarium.multi.sex_policy == 'single_only' %} (только поодиночке)
+                                {% elif entry.terrarium.multi.sex_policy == 'female_group_only' %} (группа самок)
+                                {% elif entry.terrarium.multi.sex_policy == 'same_size_only' %} (одного размера)
+                                {% elif entry.terrarium.multi.sex_policy == 'watch_aggression' %} (следить за агрессией)
+                                {% endif %}
+                                {% if entry.terrarium.multi.notes %} — {{ entry.terrarium.multi.notes }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#feed-{{ entry.id }}">
+                            Кормление по возрастам
+                        </button>
+                    </h2>
+                    <div id="feed-{{ entry.id }}" class="accordion-collapse collapse" data-bs-parent="#acc-{{ entry.id }}">
+                        <div class="accordion-body">
+                            {% if entry.feeding_policy.default %}
+                            <p class="mb-2">
+                                <strong>Базовый режим:</strong>
+                                каждые {{ entry.feeding_policy.default.interval_days }} дн.,
+                                {{ entry.feeding_policy.default.food_type }},
+                                {{ entry.feeding_policy.default.amount }} порц.
+                            </p>
+                            {% endif %}
+                            <p class="mb-2">
+                                <strong>Разморозка:</strong>
+                                {% if entry.feeding_policy.thawing_allowed == True %}можно{% elif entry.feeding_policy.thawing_allowed == False %}обычно нет{% else %}уточняется{% endif %}
+                                {% if entry.feeding_policy.thawing_notes %} — {{ entry.feeding_policy.thawing_notes }}{% endif %}
+                            </p>
+                            {% if entry.feeding_policy.stages %}
+                            <ul class="tm-stage-list">
+                                {% for stage in entry.feeding_policy.stages %}
+                                <li>
+                                    <span class="age">{{ stage.age_from_months }}–{% if stage.age_to_months %}{{ stage.age_to_months }}{% else %}+{% endif %} мес</span>
+                                    <span>каждые {{ stage.interval_days }} дн. · {{ stage.food_type }} · {{ stage.amount }} порц.</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% else %}
+                            <p class="mb-0">Детальные этапы пока не заполнены — используйте базовый режим.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if entry.care.lighting or entry.care.substrate or entry.morphs %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#more-{{ entry.id }}">
+                            Свет, субстрат, морфы
+                        </button>
+                    </h2>
+                    <div id="more-{{ entry.id }}" class="accordion-collapse collapse" data-bs-parent="#acc-{{ entry.id }}">
+                        <div class="accordion-body">
+                            {% if entry.care.lighting %}<p class="mb-2"><strong>Свет:</strong> {{ entry.care.lighting }}</p>{% endif %}
+                            {% if entry.care.substrate %}<p class="mb-2"><strong>Субстрат:</strong> {{ entry.care.substrate }}</p>{% endif %}
+                            {% if entry.morphs %}
+                            <p class="mb-1"><strong>Морфы в каталоге:</strong></p>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for morph in entry.morphs %}
+                                <span class="tm-chip">{{ morph.name }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="footer">
+            {% if entry.is_imported %}
+            <span class="tm-chip is-ok"><i class="bi bi-check-circle"></i> Уже в базе</span>
+            <a href="{% url 'animals:animal_create' %}{% if entry.taxonomy_pk %}?taxonomy={{ entry.taxonomy_pk }}{% endif %}"
+               class="btn btn-sm btn-primary">Создать животное</a>
+            {% else %}
+            <span class="small text-muted">Не в вашей базе</span>
+            <form method="post" action="{% url 'animals:species_library_import' entry.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" name="create_animal" value="1" class="btn btn-sm btn-primary">В базу и создать</button>
+                <button type="submit" class="btn btn-sm btn-outline-primary">Только в базу</button>
+            </form>
+            {% endif %}
+        </div>
+    </article>
+    {% empty %}
+    <div class="alert alert-info">Ничего не найдено. Попробуйте другой запрос или сбросьте фильтр.</div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -10,79 +10,28 @@ from django.utils.text import slugify
 User = get_user_model()
 
 
-class Species(models.Model):
-    name = models.CharField("Название вида", max_length=100, unique=True)
-    scientific_name = models.CharField("Научное название", max_length=100)
+class Collection(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='collections')
+    name = models.CharField('Название', max_length=100)
+    description = models.TextField('Описание', blank=True)
+    is_global = models.BooleanField('Общая библиотека', default=False)
 
     class Meta:
-        verbose_name = "Вид"
-        verbose_name_plural = "Виды"
-        ordering = ['name']
+        verbose_name = 'Коллекция'
+        verbose_name_plural = 'Коллекции'
 
     def __str__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return reverse('animals:species_select')
 
-
-class Animal(models.Model):
-    SEX_CHOICES = [
-        ('M', 'Самец'),
-        ('F', 'Самка'),
-        ('U', 'Неизвестно')
-    ]
-    HABITAT_CHOICES = [
-        ('TROPICAL', 'Тропическая'),
-        ('DESERT', 'Пустынная'),
-        ('AQUATIC', 'Полуводная'),
-    ]
-    CARE_LEVEL_CHOICES = [
-        ('BEGINNER', 'Новичок'),
-        ('INTERMEDIATE', 'Средний'),
-        ('EXPERT', 'Эксперт'),
-    ]
-
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")
-    name = models.CharField("Кличка", max_length=100)
-    taxonomy = models.ForeignKey('Taxonomy', on_delete=models.PROTECT, verbose_name="Таксон")
-    morph = models.ForeignKey('Morph', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Морфа")
-    birth_date = models.DateField("Дата рождения/вылупления")
-    sex = models.CharField("Пол", max_length=1, choices=SEX_CHOICES)
-    acquisition_date = models.DateField("Дата приобретения", auto_now_add=True)
-    photo = models.ImageField("Фото", upload_to='animals/', blank=True)
-    notes = models.TextField("Заметки", blank=True)
-    habitat = models.CharField("Среда обитания", max_length=20, choices=HABITAT_CHOICES)
-    care_level = models.CharField("Сложность ухода", max_length=20, choices=CARE_LEVEL_CHOICES)
-
-    def generate_upload_path(self, filename):
-        ext = filename.split('.')[-1]
-        safe_filename = f"{slugify(self.name or 'animal')}-{uuid4().hex[:8]}.{ext}"
-        return os.path.join('animals', safe_filename)
-
-    def save(self, *args, **kwargs):
-        if self.pk:
-            # Получаем старый объект из базы
-            old = Animal.objects.filter(pk=self.pk).first()
-            if old and old.photo != self.photo and self.photo:
-                # Только если фото новое — меняем имя
-                self.photo.name = self.generate_upload_path(self.photo.name)
-        elif self.photo:
-            # Новый объект — сразу задаём имя
-            self.photo.name = self.generate_upload_path(self.photo.name)
-
-        super().save(*args, **kwargs)
+class CollectionMember(models.Model):
+    ROLE_CHOICES = [('viewer', 'Просмотр'), ('editor', 'Редактор')]
+    collection = models.ForeignKey(Collection, on_delete=models.CASCADE, related_name='members')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='viewer')
 
     class Meta:
-        verbose_name = "Животное"
-        verbose_name_plural = "Животные"
-        ordering = ['-acquisition_date']
-
-    def __str__(self):
-        return f"{self.name} ({self.taxonomy.species})"
-
-    def get_absolute_url(self):
-        return reverse('animals:animal_detail', kwargs={'pk': self.pk})
+        unique_together = ('collection', 'user')
 
 
 class Taxonomy(models.Model):
@@ -93,6 +42,15 @@ class Taxonomy(models.Model):
     species = models.CharField("Вид", max_length=100, unique=True)
     subspecies = models.CharField("Подвид", max_length=100, blank=True)
     scientific_name = models.CharField("Научное название", max_length=200, unique=True)
+    common_name = models.CharField("Народное название", max_length=200, blank=True)
+    library_id = models.CharField(
+        "ID в справочнике",
+        max_length=100,
+        blank=True,
+        null=True,
+        unique=True,
+    )
+    is_global = models.BooleanField('Глобальный справочник', default=True)
 
     class Meta:
         verbose_name = "Таксон"
@@ -114,6 +72,95 @@ class Morph(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.taxonomy.species})"
+
+
+class Animal(models.Model):
+    SEX_CHOICES = [
+        ('M', 'Самец'),
+        ('F', 'Самка'),
+        ('U', 'Неизвестно')
+    ]
+    HABITAT_CHOICES = [
+        ('TROPICAL', 'Тропическая'),
+        ('DESERT', 'Пустынная'),
+        ('AQUATIC', 'Полуводная'),
+    ]
+    CARE_LEVEL_CHOICES = [
+        ('BEGINNER', 'Новичок'),
+        ('INTERMEDIATE', 'Средний'),
+        ('EXPERT', 'Эксперт'),
+    ]
+
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Владелец")
+    collection = models.ForeignKey(
+        Collection, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='animals', verbose_name='Коллекция',
+    )
+    name = models.CharField("Кличка", max_length=100)
+    taxonomy = models.ForeignKey('Taxonomy', on_delete=models.PROTECT, verbose_name="Таксон")
+    morph = models.ForeignKey('Morph', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Морфа")
+    parent_m = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='offspring_m', verbose_name='Отец',
+    )
+    parent_f = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='offspring_f', verbose_name='Мать',
+    )
+    birth_date = models.DateField("Дата рождения/вылупления")
+    sex = models.CharField("Пол", max_length=1, choices=SEX_CHOICES)
+    acquisition_date = models.DateField("Дата приобретения", default=timezone.localdate)
+    photo = models.ImageField("Фото", upload_to='animals/', blank=True)
+    notes = models.TextField("Заметки", blank=True)
+    habitat = models.CharField("Среда обитания", max_length=20, choices=HABITAT_CHOICES)
+    care_level = models.CharField("Сложность ухода", max_length=20, choices=CARE_LEVEL_CHOICES)
+
+    def generate_upload_path(self, filename):
+        ext = filename.split('.')[-1]
+        safe_filename = f"{slugify(self.name or 'animal')}-{uuid4().hex[:8]}.{ext}"
+        return os.path.join('animals', safe_filename)
+
+    def save(self, *args, **kwargs):
+        old_photo = None
+        if self.pk:
+            old = Animal.objects.filter(pk=self.pk).first()
+            if old and old.photo and old.photo != self.photo:
+                old_photo = old.photo
+            if old and old.photo != self.photo and self.photo:
+                self.photo.name = self.generate_upload_path(self.photo.name)
+        elif self.photo:
+            self.photo.name = self.generate_upload_path(self.photo.name)
+
+        super().save(*args, **kwargs)
+
+        if old_photo and (not self.photo or old_photo.name != self.photo.name):
+            old_photo.delete(save=False)
+
+    class Meta:
+        verbose_name = "Животное"
+        verbose_name_plural = "Животные"
+        ordering = ['-acquisition_date']
+
+    def __str__(self):
+        return f"{self.name} ({self.taxonomy.species})"
+
+    def get_absolute_url(self):
+        return reverse('animals:animal_detail', kwargs={'pk': self.pk})
+
+
+class AnimalPhoto(models.Model):
+    animal = models.ForeignKey(Animal, on_delete=models.CASCADE, related_name='photos', verbose_name='Животное')
+    image = models.ImageField('Фото', upload_to='animals/gallery/')
+    caption = models.CharField('Подпись', max_length=200, blank=True)
+    date = models.DateField('Дата', auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Фото животного'
+        verbose_name_plural = 'Фото животных'
+        ordering = ['-date']
+
+    def __str__(self):
+        return f'{self.animal.name} — {self.date}'
 
 
 class Action(models.Model):
@@ -151,6 +198,9 @@ class CareRequirement(models.Model):
     diet = models.TextField("Рацион")
     lighting = models.TextField("Освещение", blank=True)
     substrate = models.TextField("Субстрат", blank=True)
+    # Расширенные параметры из справочника (террариум, группы/пол, возрастное кормление, разморозка и т.п.).
+    # Это позволяет хранить структурированные данные без разрастания модели.
+    catalog_details = models.JSONField("Расширенные детали справочника", blank=True, default=dict)
 
     class Meta:
         verbose_name = "Требование по уходу"

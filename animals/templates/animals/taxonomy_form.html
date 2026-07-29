@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Добавить таксон — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Добавить таксон</h1>
+        <p class="tm-page-lede">Научная классификация вида для вашей коллекции.</p>
+    </div>
+</div>
+
+<div class="tm-form-card" style="max-width:720px">
+    <form method="post">
+        {% csrf_token %}
+        {% crispy form %}
+        <div class="tm-form-actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{% url 'animals:animal_list' %}" class="btn btn-outline-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

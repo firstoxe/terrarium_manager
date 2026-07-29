@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Инкубация — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>{{ object.clutch.pair.male.name }} × {{ object.clutch.pair.female.name }}</h1>
+        <p class="tm-page-lede">Параметры инкубации и ожидаемое вылупление.</p>
+    </div>
+    <div class="tm-actions">
+        <a href="{% url 'incubation:list' %}" class="btn btn-outline-secondary">Назад</a>
+    </div>
+</div>
+
+<div class="tm-form-card" style="max-width:640px">
+    <dl class="tm-kv">
+        <dt>Кладка</dt>
+        <dd>{{ object.clutch.lay_date|date:"d.m.Y" }} — {{ object.clutch.egg_count }} яиц</dd>
+        <dt>Начало</dt>
+        <dd>{{ object.start_date|date:"d.m.Y" }}</dd>
+        <dt>Ожидаемое вылупление</dt>
+        <dd>{{ object.expected_hatch|date:"d.m.Y" }}</dd>
+        <dt>Температура</dt>
+        <dd>{{ object.temperature|default:"—" }} °C</dd>
+        <dt>Влажность</dt>
+        <dd>{{ object.humidity|default:"—" }} %</dd>
+    </dl>
+</div>
+{% endblock %}

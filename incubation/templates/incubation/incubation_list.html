@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Инкубации — Terrarium Manager{% endblock %}
+
+{% block content %}
+<div class="tm-page-header">
+    <div>
+        <h1>Инкубации</h1>
+        <p class="tm-page-lede">Активные кладки и ожидаемые даты вылупления.</p>
+    </div>
+</div>
+
+{% if incubations %}
+<div class="card">
+    <div class="list-group list-group-flush">
+        {% for inc in incubations %}
+        <a href="{% url 'incubation:detail' inc.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+            <span>{{ inc.clutch.pair.male.name }} × {{ inc.clutch.pair.female.name }} — {{ inc.expected_hatch|date:"d.m.Y" }}</span>
+            {% if inc.days_remaining >= 0 %}
+            <span class="tm-chip is-info">{{ inc.days_remaining }} дн.</span>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">Нет активных инкубаций.</div>
+{% endif %}
+{% endblock %}

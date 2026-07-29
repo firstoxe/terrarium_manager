@@ -1,0 +1,792 @@
+{
+  "version": 1,
+  "locale": "ru",
+  "description": "Популярные виды для быстрого старта",
+  "species": [
+    {
+      "id": "eublepharis-macularius",
+      "common_name": "Эублефар пятнистый",
+      "scientific_name": "Eublepharis macularius",
+      "class_name": "Reptilia",
+      "order": "Squamata",
+      "family": "Gekkonidae",
+      "genus": "Eublepharis",
+      "species": "macularius",
+      "habitat": "DESERT",
+      "care_level": "BEGINNER",
+      "tags": [
+        "gecko",
+        "popular_ru"
+      ],
+      "care": {
+        "temperature_min": 24,
+        "temperature_max": 32,
+        "humidity_min": 30,
+        "humidity_max": 40,
+        "diet": "Сверчки, тараканы, зофобас, морские сверчки",
+        "lighting": "UVB 5%, дневной свет 12 ч",
+        "substrate": "Бумажные полотенца / кальциевый песок"
+      },
+      "feeding_default": {
+        "interval_days": 2,
+        "food_type": "Сверчки",
+        "amount": 5
+      },
+      "morphs": [
+        {
+          "name": "Normal",
+          "description": "Дикий тип окраски"
+        },
+        {
+          "name": "Tremper Albino",
+          "description": "Альбинос Tremper"
+        },
+        {
+          "name": "Mack Snow",
+          "description": "Осветлённая морфа"
+        },
+        {
+          "name": "Eclipse",
+          "description": "Полностью чёрные глаза"
+        },
+        {
+          "name": "Enigma",
+          "description": "Пятнистая/unstable окраска"
+        }
+      ],
+      "sources": [
+        "Reptifiles",
+        "Leopard Gecko Wiki"
+      ],
+      "terrarium": {
+        "one_individual": {
+          "min_cm": {
+            "length": 60,
+            "width": 40,
+            "height": 40
+          },
+          "recommended_cm": {
+            "length": 80,
+            "width": 40,
+            "height": 40
+          },
+          "notes": "Сухой тёплый террариум с тёплым и холодным укрытием."
+        },
+        "multi": {
+          "allowed": false,
+          "max_per_enclosure": 1,
+          "sex_policy": "single_only",
+          "notes": "Лучше одиночное содержание."
+        }
+      },
+      "feeding_policy": {
+        "thawing_allowed": true,
+        "thawing_notes": "Можно размороженных насекомых/корм, но лучше живой подвижный корм.",
+        "stages": [
+          {
+            "age_from_months": 0,
+            "age_to_months": 6,
+            "interval_days": 1,
+            "food_type": "Мелкие насекомые",
+            "amount": 6
+          },
+          {
+            "age_from_months": 6,
+            "age_to_months": 18,
+            "interval_days": 2,
+            "food_type": "Насекомые среднего размера",
+            "amount": 6
+          },
+          {
+            "age_from_months": 18,
+            "age_to_months": null,
+            "interval_days": 3,
+            "food_type": "Насекомые + кальций",
+            "amount": 5
+          }
+        ],
+        "default": {
+          "interval_days": 2,
+          "food_type": "Сверчки",
+          "amount": 5
+        }
+      }
+    },
+    {
+      "id": "python-regius",
+      "common_name": "Королевский питон",
+      "scientific_name": "Python regius",
+      "class_name": "Reptilia",
+      "order": "Squamata",
+      "family": "Pythonidae",
+      "genus": "Python",
+      "species": "regius",
+      "habitat": "TROPICAL",
+      "care_level": "BEGINNER",
+      "tags": [
+        "python",
+        "popular_ru"
+      ],
+      "care": {
+        "temperature_min": 24,
+        "temperature_max": 32,
+        "humidity_min": 50,
+        "humidity_max": 60,
+        "diet": "Грызуны (мыши, крысы по размеру)",
+        "lighting": "Не требуется",
+        "substrate": "Кора, опилки aspen, кокос"
+      },
+      "feeding_default": {
+        "interval_days": 7,
+        "food_type": "Мышь",
+        "amount": 1
+      },
+      "morphs": [
+        {
+          "name": "Normal",
+          "description": "Дикий тип"
+        },
+        {
+          "name": "Pastel",
+          "description": "Co-dominant"
+        },
+        {
+          "name": "Mojave",
+          "description": "Co-dominant"
+        },
+        {
+          "name": "Clown",
+          "description": "Recessive"
+        },
+        {
+          "name": "Piebald",
+          "description": "Recessive"
+        }
+      ],
+      "sources": [
+        "Reptifiles",
+        "World of Ball Pythons"
+      ],
+      "terrarium": {
+        "one_individual": {
+          "min_cm": {
+            "length": 100,
+            "width": 50,
+            "height": 50
+          },
+          "recommended_cm": {
+            "length": 120,
+            "width": 60,
+            "height": 60
+          },
+          "notes": "Нужны укрытия с двух сторон и стабильная влажность."
+        },
+        "multi": {
+          "allowed": false,
+          "max_per_enclosure": 1,
+          "sex_policy": "single_only",
+          "notes": "Только одиночное содержание."
+        }
+      },
+      "feeding_policy": {
+        "thawing_allowed": true,
+        "thawing_notes": "Размороженные грызуны предпочтительны и безопаснее.",
+        "stages": [
+          {
+            "age_from_months": 0,
+            "age_to_months": 6,
+            "interval_days": 5,
+            "food_type": "Пуховые/мелкие мыши",
+            "amount": 1
+          },
+          {
+            "age_from_months": 6,
+            "age_to_months": 18,
+            "interval_days": 7,
+            "food_type": "Подростковые мыши",
+            "amount": 1
+          },
+          {
+            "age_from_months": 18,
+            "age_to_months": null,
+            "interval_days": 10,
+            "food_type": "Взрослые мыши/крысы по размеру",
+            "amount": 1
+          }
+        ],
+        "default": {
+          "interval_days": 7,
+          "food_type": "Мышь",
+          "amount": 1
+        }
+      }
+    },
+    {
+      "id": "pantherophis-guttatus",
+      "common_name": "Кукурузная змея",
+      "scientific_name": "Pantherophis guttatus",
+      "class_name": "Reptilia",
+      "order": "Squamata",
+      "family": "Colubridae",
+      "genus": "Pantherophis",
+      "species": "guttatus",
+      "habitat": "DESERT",
+      "care_level": "BEGINNER",
+      "tags": [
+        "colubrid",
+        "popular_ru"
+      ],
+      "care": {
+        "temperature_min": 24,
+        "temperature_max": 30,
+        "humidity_min": 40,
+        "humidity_max": 50,
+        "diet": "Грызуны, птица (птенцы)",
+        "lighting": "Не требуется",
+        "substrate": "Aspen, бумажные полотенца"
+      },
+      "feeding_default": {
+        "interval_days": 7,
+        "food_type": "Мышь",
+        "amount": 1
+      },
+      "morphs": [
+        {
+          "name": "Normal",
+          "description": "Дикий тип"
+        },
+        {
+          "name": "Amelanistic",
+          "description": "Albino"
+        },
+        {
+          "name": "Anerythristic",
+          "description": "Black albino"
+        },
+        {
+          "name": "Snow",
+          "description": "Комбинация amel + anery"
+        }
+      ],
+      "sources": [
+        "Reptifiles"
+      ],
+      "terrarium": {
+        "one_individual": {
+          "min_cm": {
+            "length": 80,
+            "width": 40,
+            "height": 40
+          },
+          "recommended_cm": {
+            "length": 100,
+            "width": 50,
+            "height": 50
+          },
+          "notes": "Хорошая вентиляция, укрытия и ветка для обогащения среды."
+        },
+        "multi": {
+          "allowed": false,
+          "max_per_enclosure": 1,
+          "sex_policy": "single_only",
+          "notes": "Рекомендуется одиночное содержание."
+        }
+      },
+      "feeding_policy": {
+        "thawing_allowed": true,
+        "thawing_notes": "Размороженные грызуны — стандарт.",
+        "stages": [
+          {
+            "age_from_months": 0,
+            "age_to_months": 6,
+            "interval_days": 5,
+            "food_type": "Пинки/фаззи",
+            "amount": 1
+          },
+          {
+            "age_from_months": 6,
+            "age_to_months": 18,
+            "interval_days": 7,
+            "food_type": "Подростковые мыши",
+            "amount": 1
+          },
+          {
+            "age_from_months": 18,
+            "age_to_months": null,
+            "interval_days": 10,
+            "food_type": "Взрослые мыши",
+            "amount": 1
+          }
+        ],
+        "default": {
+          "interval_days": 7,
+          "food_type": "Мышь",
+          "amount": 1
+        }
+      }
+    },
+    {
+      "id": "pogona-vitticeps",
+      "common_name": "Агама бородатая",
+      "scientific_name": "Pogona vitticeps",
+      "class_name": "Reptilia",
+      "order": "Squamata",
+      "family": "Agamidae",
+      "genus": "Pogona",
+      "species": "vitticeps",
+      "habitat": "DESERT",
+      "care_level": "BEGINNER",
+      "tags": [
+        "agama",
+        "popular_ru"
+      ],
+      "care": {
+        "temperature_min": 26,
+        "temperature_max": 38,
+        "humidity_min": 30,
+        "humidity_max": 40,
+        "diet": "Насекомые (молодые), салат/овощи (взрослые)",
+        "lighting": "UVB 10–12%, яркий дневной свет",
+        "substrate": "Коврик / песок без кальция"
+      },
+      "feeding_default": {
+        "interval_days": 1,
+        "food_type": "Салат + насекомые",
+        "amount": 1
+      },
+      "morphs": [
+        {
+          "name": "Normal",
+          "description": "Дикий тип"
+        },
+        {
+          "name": "Hypo",
+          "description": "Hypomelanistic"
+        },
+        {
+          "name": "Translucent",
+          "description": "Просвечивающая кожа"
+        },
+        {
+          "name": "Leatherback",
+          "description": "Уменьшенные чешуйки"
+        }
+      ],
+      "sources": [
+        "Reptifiles"
+      ],
+      "terrarium": {
+        "one_individual": {
+          "min_cm": {
+            "length": 100,
+            "width": 50,
+            "height": 50
+          },
+          "recommended_cm": {
+            "length": 120,
+            "width": 60,
+            "height": 60
+          },
+          "notes": "Обязательна мощная UVB и зона прогрева."
+        },
+        "multi": {
+          "allowed": false,
+          "max_per_enclosure": 1,
+          "sex_policy": "single_only",
+          "notes": "Самцов вместе держать нельзя, новичкам лучше по одной особи."
+        }
+      },
+      "feeding_policy": {
+        "thawing_allowed": true,
+        "thawing_notes": "Для белковой части можно размороженные корма, основу составляют насекомые и зелень.",
+        "stages": [
+          {
+            "age_from_months": 0,
+            "age_to_months": 4,
+            "interval_days": 1,
+            "food_type": "Мелкие насекомые 2-3 приёма/день",
+            "amount": 15
+          },
+          {
+            "age_from_months": 4,
+            "age_to_months": 12,
+            "interval_days": 1,
+            "food_type": "Насекомые + зелень ежедневно",
+            "amount": 10
+          },
+          {
+            "age_from_months": 12,
+            "age_to_months": null,
+            "interval_days": 1,
+            "food_type": "Зелень ежедневно, насекомые 2-4 раза/нед",
+            "amount": 1
+          }
+        ],
+        "default": {
+          "interval_days": 1,
+          "food_type": "Салат + насекомые",
+          "amount": 1
+        }
+      }
+    },
+    {
+      "id": "correlophus-ciliatus",
+      "common_name": "Геккон ресничный",
+      "scientific_name": "Correlophus ciliatus",
+      "class_name": "Reptilia",
+      "order": "Squamata",
+      "family": "Diplodactylidae",
+      "genus": "Correlophus",
+      "species": "ciliatus",
+      "habitat": "TROPICAL",
+      "care_level": "BEGINNER",
+      "tags": [
+        "gecko",
+        "popular_ru"
+      ],
+      "care": {
+        "temperature_min": 22,
+        "temperature_max": 26,
+        "humidity_min": 60,
+        "humidity_max": 80,
+        "diet": "CGD (коммерческий рацион), насекомые, фрукты",
+        "lighting": "Не обязателен, UVB низкий опционально",
+        "substrate": "Кокос, мох, бумажные полотенца"
+      },
+      "feeding_default": {
+        "interval_days": 2,
+        "food_type": "CGD",
+        "amount": 1
+      },
+      "morphs": [
+        {
+          "name": "Normal",
+          "description": "Дикий тип"
+        },
+        {
+          "name": "Harlequin",
+          "description": "Паттерн на боках и лапах"
+        },
+        {
+          "name": "Pinstripe",
+          "description": "Полоски по спине"
+        },
+        {
+          "name": "Flame",
+          "description": "Яркая спинная полоса"
+        }
+      ],
+      "sources": [
+        "Reptifiles"
+      ],
+      "terrarium": {
+        "one_individual": {
+          "min_cm": {
+            "length": 45,
+            "width": 45,
+            "height": 60
+          },
+          "recommended_cm": {
+            "length": 60,
+            "width": 45,
+            "height": 90
+          },
+          "notes": "Вертикальный террариум с ветками и укрытиями."
+        },
+        "multi": {
+          "allowed": true,
+          "max_per_enclosure": 2,
+          "sex_policy": "female_group_only",
+          "notes": "Обычно держат одиночно; допустима группа самок при контроле."
+        }
+      },
+      "feeding_policy": {
+        "thawing_allowed": false,
+        "thawing_notes": "Основа — CGD и живые насекомые, разморозка обычно не используется.",
+        "stages": [
+          {
+            "age_from_months": 0,
+            "age_to_months": 6,
+            "interval_days": 1,
+            "food_type": "CGD ежедневно + мелкие насекомые",
+            "amount": 1
+          },
+          {
+            "age_from_months": 6,
+            "age_to_months": 18,
+            "interval_days": 2,
+            "food_type": "CGD через день + насекомые 2-3 раза/нед",
+            "amount": 1
+          },
+          {
+            "age_from_months": 18,
+            "age_to_months": null,
+            "interval_days": 2,
+            "food_type": "CGD через день + насекомые 1-2 раза/нед",
+            "amount": 1
+          }
+        ],
+        "default": {
+          "interval_days": 2,
+          "food_type": "CGD",
+          "amount": 1
+        }
+      }
+    },
+    {
+      "id": "testudo-horsfieldii",
+      "common_name": "Среднеазиатская черепаха",
+      "scientific_name": "Testudo horsfieldii",
+      "class_name": "Reptilia",
+      "order": "Testudines",
+      "family": "Testudinidae",
+      "genus": "Testudo",
+      "species": "horsfieldii",
+      "habitat": "DESERT",
+      "care_level": "BEGINNER",
+      "tags": [
+        "tortoise",
+        "popular_ru"
+      ],
+      "care": {
+        "temperature_min": 22,
+        "temperature_max": 32,
+        "humidity_min": 30,
+        "humidity_max": 50,
+        "diet": "Сено, одуванчик, кактусовые, без фруктов",
+        "lighting": "UVB 10–12%, лампа нагрева",
+        "substrate": "Грунт/кокос, не пересушенный"
+      },
+      "feeding_default": {
+        "interval_days": 1,
+        "food_type": "Сено",
+        "amount": 1
+      },
+      "morphs": [],
+      "sources": [
+        "Tortoise Trust",
+        "Reptifiles"
+      ],
+      "terrarium": {
+        "one_individual": {
+          "min_cm": {
+            "length": null,
+            "width": null,
+            "height": null
+          },
+          "recommended_cm": {
+            "length": null,
+            "width": null,
+            "height": null
+          },
+          "notes": ""
+        },
+        "multi": {
+          "allowed": null,
+          "max_per_enclosure": null,
+          "sex_policy": null,
+          "notes": ""
+        }
+      },
+      "feeding_policy": {
+        "thawing_allowed": null,
+        "thawing_notes": "",
+        "stages": [],
+        "default": {
+          "interval_days": 1,
+          "food_type": "Сено",
+          "amount": 1
+        }
+      }
+    },
+    {
+      "id": "ambystoma-mexicanum",
+      "common_name": "Аксолotl",
+      "scientific_name": "Ambystoma mexicanum",
+      "class_name": "Amphibia",
+      "order": "Caudata",
+      "family": "Ambystomatidae",
+      "genus": "Ambystoma",
+      "species": "mexicanum",
+      "habitat": "AQUATIC",
+      "care_level": "BEGINNER",
+      "tags": [
+        "amphibian",
+        "popular_ru"
+      ],
+      "care": {
+        "temperature_min": 16,
+        "temperature_max": 20,
+        "humidity_min": 80,
+        "humidity_max": 100,
+        "diet": "Личинки рыб, черви, специализированные гранулы",
+        "lighting": "Минимальный, без прямого солнца",
+        "substrate": "Пустой аквариум / песок без глотания"
+      },
+      "feeding_default": {
+        "interval_days": 1,
+        "food_type": "Черви",
+        "amount": 2
+      },
+      "morphs": [
+        {
+          "name": "Wild",
+          "description": "Дикий оливковый"
+        },
+        {
+          "name": "Leucistic",
+          "description": "Белый с розовыми жабрами"
+        },
+        {
+          "name": "Golden albino",
+          "description": "Золотистый альбинос"
+        }
+      ],
+      "sources": [
+        "Axolotl.org"
+      ],
+      "terrarium": {
+        "one_individual": {
+          "min_cm": {
+            "length": 80,
+            "width": 35,
+            "height": 35
+          },
+          "recommended_cm": {
+            "length": 100,
+            "width": 40,
+            "height": 40
+          },
+          "notes": "Прохладная чистая вода, без сильного течения."
+        },
+        "multi": {
+          "allowed": true,
+          "max_per_enclosure": 2,
+          "sex_policy": "same_size_only",
+          "notes": "Можно группой одного размера при достаточном объёме воды."
+        }
+      },
+      "feeding_policy": {
+        "thawing_allowed": true,
+        "thawing_notes": "Можно размороженные корма и гранулы; следить за качеством воды.",
+        "stages": [
+          {
+            "age_from_months": 0,
+            "age_to_months": 6,
+            "interval_days": 1,
+            "food_type": "Черви/гранулы небольшими порциями",
+            "amount": 2
+          },
+          {
+            "age_from_months": 6,
+            "age_to_months": 18,
+            "interval_days": 1,
+            "food_type": "Черви, гранулы, реже рыба",
+            "amount": 2
+          },
+          {
+            "age_from_months": 18,
+            "age_to_months": null,
+            "interval_days": 2,
+            "food_type": "Крупные черви, гранулы",
+            "amount": 2
+          }
+        ],
+        "default": {
+          "interval_days": 1,
+          "food_type": "Черви",
+          "amount": 2
+        }
+      }
+    },
+    {
+      "id": "trachemys-scripta-elegans",
+      "common_name": "Красноухая черепаха",
+      "scientific_name": "Trachemys scripta elegans",
+      "class_name": "Reptilia",
+      "order": "Testudines",
+      "family": "Emydidae",
+      "genus": "Trachemys",
+      "species": "scripta elegans",
+      "subspecies": "elegans",
+      "habitat": "AQUATIC",
+      "care_level": "BEGINNER",
+      "tags": [
+        "turtle",
+        "aquatic",
+        "popular_ru"
+      ],
+      "care": {
+        "temperature_min": 24,
+        "temperature_max": 28,
+        "humidity_min": 80,
+        "humidity_max": 100,
+        "diet": "Корм для водных черепах, растительная добавка",
+        "lighting": "UVB для водных, суша",
+        "substrate": "Вода + сухая зона"
+      },
+      "feeding_default": {
+        "interval_days": 1,
+        "food_type": "Корм для черепах",
+        "amount": 1
+      },
+      "morphs": [],
+      "sources": [
+        "Reptifiles"
+      ],
+      "terrarium": {
+        "one_individual": {
+          "min_cm": {
+            "length": 100,
+            "width": 40,
+            "height": 50
+          },
+          "recommended_cm": {
+            "length": 120,
+            "width": 50,
+            "height": 60
+          },
+          "notes": "Нужна суша с прогревом и глубокая фильтруемая вода."
+        },
+        "multi": {
+          "allowed": true,
+          "max_per_enclosure": 2,
+          "sex_policy": "watch_aggression",
+          "notes": "Совместное содержание возможно только при объёме и контроле агрессии."
+        }
+      },
+      "feeding_policy": {
+        "thawing_allowed": true,
+        "thawing_notes": "Можно размороженную рыбу/кормовые смеси.",
+        "stages": [
+          {
+            "age_from_months": 0,
+            "age_to_months": 12,
+            "interval_days": 1,
+            "food_type": "Белковый рацион ежедневно",
+            "amount": 1
+          },
+          {
+            "age_from_months": 12,
+            "age_to_months": 48,
+            "interval_days": 1,
+            "food_type": "Корма + рыба + растительность",
+            "amount": 1
+          },
+          {
+            "age_from_months": 48,
+            "age_to_months": null,
+            "interval_days": 2,
+            "food_type": "Больше растительной пищи, белок 2-4 раза/нед",
+            "amount": 1
+          }
+        ],
+        "default": {
+          "interval_days": 1,
+          "food_type": "Корм для черепах",
+          "amount": 1
+        }
+      }
+    }
+  ]
+}

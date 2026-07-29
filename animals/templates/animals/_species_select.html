@@ -1,8 +1,0 @@
-<select name="species" class="form-select" id="id_species">
-    <option value="">Выберите вид</option>
-    {% for species in species_list %}
-    <option value="{{ species.id }}" {% if species.id == new_species %}selected{% endif %}>
-        {{ species.name }}
-    </option>
-    {% endfor %}
-</select>

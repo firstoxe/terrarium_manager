@@ -2,140 +2,217 @@
 {% load django_tables2 %}
 {% load crispy_forms_tags %}
 
+{% block title %}{{ object.name }} — Terrarium Manager{% endblock %}
+
 {% block content %}
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">{{ object.name }}</h3>
-                <div>
-                    <a href="{% url 'animals:animal_update' object.pk %}" class="btn btn-sm btn-warning">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                    <a href="{% url 'animals:animal_delete' object.pk %}" class="btn btn-sm btn-danger">
-                        <i class="bi bi-trash"></i>
-                    </a>
-                </div>
+<div class="tm-page-header">
+    <div>
+        <h1>{{ object.name }}</h1>
+        <p class="tm-page-lede">{{ object.taxonomy.scientific_name }}{% if object.morph %} · {{ object.morph.name }}{% endif %}</p>
+    </div>
+    <div class="tm-actions">
+        {% if feeding_schedule %}
+        <form method="post" action="{% url 'feeding:feed_today' object.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success">Покормил</button>
+        </form>
+        {% else %}
+        <a href="{% url 'feeding:schedule_create' object.pk %}" class="btn btn-outline-success">+ Расписание</a>
+        {% endif %}
+        <a href="{% url 'animals:animal_update' object.pk %}" class="btn btn-outline-secondary">Изменить</a>
+    </div>
+</div>
+
+<div class="tm-hero-animal">
+    <div>
+        {% if object.photo %}
+        <img src="{{ object.photo.url }}" class="photo" alt="{{ object.name }}">
+        {% else %}
+        <div class="photo-placeholder">
+            <div class="text-center">
+                <i class="bi bi-image" style="font-size:2rem"></i>
+                <div class="small mt-1">Нет фото</div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        {% if object.photo %}
-                            <img src="{{ object.photo.url }}" class="img-fluid rounded ">
-                        {% else %}
-                            <p>Фото отсутствует</p>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-8">
-                        <dl class="row">
-                            <dt class="col-sm-3">Таксон</dt>
-                            <dd class="col-sm-9">{{ object.taxonomy.scientific_name }}</dd>
+        </div>
+        {% endif %}
+        {% if feeding_schedule %}
+        <div class="alert alert-info mt-3 mb-0">
+            Следующее кормление: <strong>{{ feeding_schedule.next_feed_date|date:"d.m.Y H:i" }}</strong>
+        </div>
+        {% endif %}
+    </div>
+    <div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <span class="tm-chip">{{ object.get_sex_display }}</span>
+            <span class="tm-chip is-info">{{ object.get_habitat_display }}</span>
+            <span class="tm-chip {% if object.care_level == 'BEGINNER' %}is-ok{% elif object.care_level == 'INTERMEDIATE' %}is-warn{% else %}is-danger{% endif %}">
+                {{ object.get_care_level_display }}
+            </span>
+        </div>
+        <dl class="tm-kv">
+            <dt>Дата рождения</dt><dd>{{ object.birth_date|date:"d.m.Y" }}</dd>
+            <dt>Приобретён</dt><dd>{{ object.acquisition_date|date:"d.m.Y" }}</dd>
+            <dt>Заметки</dt><dd>{{ object.notes|linebreaks|default:"—" }}</dd>
+        </dl>
+    </div>
+</div>
 
-                            {% if object.morph %}
-                                <dt class="col-sm-3">Морфа</dt>
-                                <dd class="col-sm-9">{{ object.morph.name }}</dd>
-                            {% endif %}
+<ul class="nav tm-tabs gap-1 mb-3" role="tablist">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overview">Обзор</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#actions">Действия</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#timeline">История</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#photos">Фото</a></li>
+</ul>
 
-                            <dt class="col-sm-3">Пол</dt>
-                            <dd class="col-sm-9">{{ object.get_sex_display }}</dd>
-
-                            <dt class="col-sm-3">Дата рождения</dt>
-                            <dd class="col-sm-9">{{ object.birth_date|date:"d.m.Y" }}</dd>
-
-                            <dt class="col-sm-3">Среда обитания</dt>
-                            <dd class="col-sm-9">{{ object.get_habitat_display }}</dd>
-
-                            <dt class="col-sm-3">Сложность ухода</dt>
-                            <dd class="col-sm-9">{{ object.get_care_level_display }}</dd>
-
-                            <dt class="col-sm-3">Заметки</dt>
-                            <dd class="col-sm-9">{{ object.notes|linebreaks }}</dd>
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="overview">
+        {% if care_requirement %}
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">Базовый уход</div>
+                    <div class="card-body">
+                        <dl class="tm-kv">
+                            <dt>Температура</dt>
+                            <dd>{{ care_requirement.temperature_min }}–{{ care_requirement.temperature_max }} °C</dd>
+                            <dt>Влажность</dt>
+                            <dd>{{ care_requirement.humidity_min }}–{{ care_requirement.humidity_max }} %</dd>
+                            <dt>Рацион</dt>
+                            <dd>{{ care_requirement.diet }}</dd>
+                            {% if care_requirement.lighting %}<dt>Свет</dt><dd>{{ care_requirement.lighting }}</dd>{% endif %}
+                            {% if care_requirement.substrate %}<dt>Субстрат</dt><dd>{{ care_requirement.substrate }}</dd>{% endif %}
                         </dl>
                     </div>
                 </div>
-                <hr>
-                <h4>Действия</h4>
-                {#                {% if actions %}#}
-                {#                    <table class="table table-hover">#}
-                {#                        <thead>#}
-                {#                        <tr>#}
-                {#                            <th>Дата</th>#}
-                {#                            <th>Тип</th>#}
-                {#                            <th>Описание</th>#}
-                {#                            <th>Затраты</th>#}
-                {#                        </tr>#}
-                {#                        </thead>#}
-                {#                        <tbody>#}
-                {#                        {% for action in actions %}#}
-                {#                            <tr>#}
-                {#                                <td>{{ action.date|date:"d.m.Y H:i" }}</td>#}
-                {#                                <td>{{ action.get_action_type_display }}</td>#}
-                {#                                <td>{{ action.description }}</td>#}
-                {#                                <td>{{ action.cost }}р.</td>#}
-                {#                            </tr>#}
-                {#                        {% endfor %}#}
-                {#                        </tbody>#}
-                {#                    </table>#}
-                {#                {% else %}#}
-                {#                    <p>Действия отсутствуют.</p>#}
-                {#                {% endif %}#}
-
-                <div class="mt-4">
-                <h5>Затраты</h5>
-                <div class="d-flex justify-content-start gap-3">
-                    <div class="card text-center border-primary" style="width: 12rem;">
-                        <div class="card-header bg-primary text-white">
-                            За неделю
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">{{ costs.week }} р.</h5>
-                        </div>
-                    </div>
-                    <div class="card text-center border-success" style="width: 12rem;">
-                        <div class="card-header bg-success text-white">
-                            За месяц
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">{{ costs.month }} р.</h5>
-                        </div>
-                    </div>
-                    <div class="card text-center border-info" style="width: 12rem;">
-                        <div class="card-header bg-info text-white">
-                            За год
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">{{ costs.year }} р.</h5>
+            </div>
+            {% if care_requirement.catalog_details %}
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header">Справочные рекомендации</div>
+                    <div class="card-body">
+                        <div class="accordion tm-accordion" id="care-acc">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#care-terr">
+                                        Террариум
+                                    </button>
+                                </h2>
+                                <div id="care-terr" class="accordion-collapse collapse show" data-bs-parent="#care-acc">
+                                    <div class="accordion-body">
+                                        {% if care_requirement.catalog_details.terrarium.one_individual.recommended_cm.length %}
+                                        <p class="mb-2">
+                                            <strong>Рекомендуется:</strong>
+                                            {{ care_requirement.catalog_details.terrarium.one_individual.recommended_cm.length }}×{{ care_requirement.catalog_details.terrarium.one_individual.recommended_cm.width }}×{{ care_requirement.catalog_details.terrarium.one_individual.recommended_cm.height }} см
+                                        </p>
+                                        {% endif %}
+                                        <p class="mb-2">{{ care_requirement.catalog_details.terrarium.one_individual.notes|default:"—" }}</p>
+                                        <p class="mb-0">{{ care_requirement.catalog_details.terrarium.multi.notes|default:"—" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#care-feed">
+                                        Кормление
+                                    </button>
+                                </h2>
+                                <div id="care-feed" class="accordion-collapse collapse" data-bs-parent="#care-acc">
+                                    <div class="accordion-body">
+                                        {% if care_requirement.catalog_details.feeding_policy.default %}
+                                        <p class="mb-2">
+                                            Базово: каждые {{ care_requirement.catalog_details.feeding_policy.default.interval_days }} дн.,
+                                            {{ care_requirement.catalog_details.feeding_policy.default.food_type }},
+                                            {{ care_requirement.catalog_details.feeding_policy.default.amount }} порц.
+                                        </p>
+                                        {% endif %}
+                                        <p class="mb-2">{{ care_requirement.catalog_details.feeding_policy.thawing_notes|default:"—" }}</p>
+                                        {% if care_requirement.catalog_details.feeding_policy.stages %}
+                                        <ul class="tm-stage-list">
+                                            {% for stage in care_requirement.catalog_details.feeding_policy.stages %}
+                                            <li>
+                                                <span class="age">{{ stage.age_from_months }}–{% if stage.age_to_months %}{{ stage.age_to_months }}{% else %}+{% endif %} мес</span>
+                                                <span>каждые {{ stage.interval_days }} дн. · {{ stage.food_type }} · {{ stage.amount }}</span>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-                {% if action_table.data %}
-                    {% render_table action_table %}
-                {% else %}
-                    <p>Действия отсутствуют.</p>
-                {% endif %}
-
-                <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#actionModal">
-                    <i class="bi bi-plus-lg"></i> Добавить действие
-                </button>
-            </div>
+            {% endif %}
         </div>
-        <div class="modal fade" id="actionModal" tabindex="-1" aria-labelledby="actionModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="actionModalLabel">Добавить действие для {{ object.name }}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="action-form" method="post" action="{% url 'animals:action_create' object.pk %}">
-                            {% csrf_token %}
-                            {% crispy action_form %}
-                        </form>
-                    </div>
-                </div>
+        {% else %}
+        <div class="alert alert-info">Для этого вида пока нет карточки ухода. Добавьте вид из справочника.</div>
+        {% endif %}
+    </div>
+
+    <div class="tab-pane fade" id="actions">
+        <div class="tm-metric-row mb-3">
+            <div class="tm-metric"><div class="k">Неделя</div><div class="v">{{ costs.week }} ₽</div></div>
+            <div class="tm-metric"><div class="k">Месяц</div><div class="v">{{ costs.month }} ₽</div></div>
+            <div class="tm-metric"><div class="k">Год</div><div class="v">{{ costs.year }} ₽</div></div>
+        </div>
+        <div class="tm-table-wrap mb-3">
+            {% if action_table.data %}{% render_table action_table %}{% else %}<div class="p-3 text-muted">Действия отсутствуют.</div>{% endif %}
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#actionModal">
+            Добавить действие
+        </button>
+    </div>
+
+    <div class="tab-pane fade" id="timeline">
+        <div class="card">
+            <div class="card-body">
+                <ul class="tm-timeline">
+                    {% for event in timeline %}
+                    <li>
+                        <div class="small text-muted">{{ event.date|date:"d.m.Y H:i" }}</div>
+                        <strong>{{ event.label }}</strong> — {{ event.description }}
+                        {% if event.cost %}<span class="text-muted">({{ event.cost }} ₽)</span>{% endif %}
+                    </li>
+                    {% empty %}
+                    <li class="text-muted">Событий пока нет</li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
     </div>
 
+    <div class="tab-pane fade" id="photos">
+        <div class="row g-3">
+            {% for photo in photos %}
+            <div class="col-md-4">
+                <img src="{{ photo.image.url }}" class="img-fluid rounded" alt="{{ photo.caption|default:object.name }}">
+                <p class="small text-muted mt-1 mb-0">{{ photo.caption|default:photo.date }}</p>
+            </div>
+            {% empty %}
+            <div class="col-12"><div class="alert alert-info mb-0">Дополнительных фото нет</div></div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
+<p class="text-muted small mt-4 mb-0">
+    <a href="{% url 'animals:animal_delete' object.pk %}" class="link-danger">Удалить животное</a>
+</p>
+
+<div class="modal fade" id="actionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Действие для {{ object.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'animals:action_create' object.pk %}">
+                    {% csrf_token %}{% crispy action_form %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
